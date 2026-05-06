@@ -780,6 +780,22 @@
         color: #000;
       }
     }
+    .search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.student-search {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  min-width: 220px;
+}
   </style>
 </head>
 
@@ -808,10 +824,12 @@
     <!-- Selector -->
     <div class="selector-bar">
       <span class="selector-label">Leerling</span>
-      <select id="studentSelect" class="student-select" onchange="switchStudent(this.value)">
-        <option value="s1">Emma De Smet 3B</option>
-        <option value="s2">Liam Janssen 3B</option>
-      </select>
+      <div class="search-wrapper">
+  <input id="studentSearch" class="student-search" type="text"
+    placeholder="Zoek leerling..." oninput="filterLeerlingen(this.value)" />
+  <select id="studentSelect" class="student-select"
+    onchange="switchStudent(this.value)" size="1"></select>
+</div>
       <button class="btn btn-ghost btn-sm" onclick="openModal()">Leerling toevoegen</button>
       <button class="btn btn-ghost btn-sm" onclick="exportJSON()">Exporteer JSON</button>
       <button class="btn btn-primary btn-sm" onclick="saveToBackend()">Opslaan naar M365</button>
@@ -1492,6 +1510,23 @@ async function loadFromBackend(leerlingId) {
   }
 }
 
+    function filterLeerlingen(query) {
+  const sel = document.getElementById("studentSelect");
+  const opts = Array.from(sel.options);
+  const q = query.toLowerCase().trim();
+
+  opts.forEach((opt) => {
+    const match = opt.textContent.toLowerCase().includes(q);
+    opt.style.display = match ? "" : "none";
+  });
+
+  // selecteer eerste zichtbare optie
+  const eerste = opts.find((o) => o.style.display !== "none");
+  if (eerste) {
+    sel.value = eerste.value;
+    switchStudent(eerste.value);
+  }
+}
     async function laadAlleLeerlingen() {
   const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f3efa19d88d14b0d9d025cd3b482c70e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gGokIvwYQXwWiLUV_aKWDP1nHIRWIdJzS07dB9VNHa4";
   try {
