@@ -1492,8 +1492,56 @@ async function loadFromBackend(leerlingId) {
   }
 }
 
-// Init default student
-    switchStudent("s1");
+    async function laadAlleLeerlingen() {
+  const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f3efa19d88d14b0d9d025cd3b482c70e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gGokIvwYQXwWiLUV_aKWDP1nHIRWIdJzS07dB9VNHa4";
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    if (!res.ok) return;
+    const text = await res.text();
+    const leerlingen = JSON.parse(text);
+    if (!leerlingen || !leerlingen.length) return;
+
+    const sel = document.getElementById("studentSelect");
+    sel.innerHTML = ""; // bestaande opties verwijderen
+
+    leerlingen.forEach((l) => {
+      const opt = document.createElement("option");
+      opt.value = l.LeerlingId;
+      opt.textContent = l.Klas ? `${l.Title} ${l.Klas}` : l.Title;
+      sel.appendChild(opt);
+
+      // ook toevoegen aan students object
+      students[l.LeerlingId] = {
+        name: l.Title,
+        klas: l.Klas || "",
+        lb: l.LB || "",
+        kd: l.KD || "",
+        periode: l.Periode || "",
+        ooz: {
+          onderwijs: l.OOZ_Onderwijs || "",
+          opvoeding: l.OOZ_Opvoeding || "",
+          zorg: l.OOZ_Zorg || "",
+        },
+        entries: { leren: [], psych: [], olb: [], prev: [] },
+      };
+    });
+
+    // eerste leerling automatisch laden
+    if (leerlingen.length > 0) {
+      currentStudent = leerlingen[0].LeerlingId;
+      sel.value = currentStudent;
+      loadFromBackend(currentStudent);
+    }
+  } catch (err) {
+    console.error("Laden leerlingen mislukt:", err);
+  }
+}
+// Init: laad alle leerlingen vanuit SharePoint
+laadAlleLeerlingen();
   </script>
 </body>
 </html>
