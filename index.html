@@ -1153,7 +1153,7 @@
     }
 
     function addIHP(sec) {
-      const id = `${sec}-${entryCounter++}`;
+      const id = `${sec}-${entryCounter++}-${Date.now()}`;
       const container = document.getElementById(`entries-${sec}`);
       const date = new Date().toLocaleDateString("nl-BE", {
         day: "2-digit",
@@ -1463,7 +1463,7 @@ async function saveToBackend() {
         });
       });
 
-      ihp.push({ domein: sec, situatieschets, analyse, doelen, aanpak, evaluaties });
+      ihp.push({ id: id, domein: sec, situatieschets, analyse, doelen, aanpak, evaluaties });
     });
   });
 
@@ -1535,7 +1535,7 @@ if (data.IHP_JSON && data.IHP_JSON !== "[]") {
       const sec = plan.domein;
       if (!SECTIONS.includes(sec)) return;
 
-      addIHP(sec);
+      addIHP(sec, plan.id || undefined);
 
       const entries = document.querySelectorAll(`#entries-${sec} .ihp-entry`);
       const entry = entries[entries.length - 1];
