@@ -1455,18 +1455,13 @@ async function saveToBackend() {
     ihp,
   };
 
-  const url = "JOUW_FLOW_URL_HIER";
-
-  try {
-    const token = await getToken();
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token,
-      },
-      body: JSON.stringify(body),
-    });
+  const res = await fetch(url, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(body),
+});
     if (!res.ok) {
       alert("Opslaan mislukt (HTTP " + res.status + ").");
       return;
