@@ -824,11 +824,24 @@
     <!-- Selector -->
     <div class="selector-bar">
       <span class="selector-label">Leerling</span>
-      <div class="search-wrapper">
+      <div class="search-wrapper" style="position:relative;">
   <input id="studentSearch" class="student-search" type="text"
-    placeholder="Zoek leerling..." oninput="filterLeerlingen(this.value)" />
-  <select id="studentSelect" class="student-select"
-    onchange="switchStudent(this.value)" size="1"></select>
+    placeholder="Zoek leerling..." oninput="filterLeerlingen(this.value)"
+    autocomplete="off" />
+  <div id="studentDropdown" style="
+    display:none;
+    position:absolute;
+    top:100%;
+    left:0;
+    right:0;
+    background:var(--color-surface);
+    border:1px solid var(--color-border);
+    border-radius:var(--radius-md);
+    box-shadow:var(--shadow-md);
+    z-index:200;
+    max-height:220px;
+    overflow-y:auto;
+  "></div>
 </div>
       <button class="btn btn-ghost btn-sm" onclick="openModal()">Leerling toevoegen</button>
       <button class="btn btn-ghost btn-sm" onclick="exportJSON()">Exporteer JSON</button>
@@ -1510,23 +1523,52 @@ async function loadFromBackend(leerlingId) {
   }
 }
 
-    function filterLeerlingen(query) {
-  const sel = document.getElementById("studentSelect");
-  const opts = Array.from(sel.options);
+    let alleLeerlingenData = [];
+
+function filterLeerlingen(query) {
+  const dropdown = document.getElementById("studentDropdown");
   const q = query.toLowerCase().trim();
 
-  opts.forEach((opt) => {
-    const match = opt.textContent.toLowerCase().includes(q);
-    opt.style.display = match ? "" : "none";
-  });
+  const gefilterd = q
+    ? alleLeerlingenData.filter((l) =>
+        l.Title.toLowerCase().includes(q) ||
+        (l.Klas || "").toLowerCase().includes(q)
+      )
+    : alleLeerlingenData;
 
-  // selecteer eerste zichtbare optie
-  const eerste = opts.find((o) => o.style.display !== "none");
-  if (eerste) {
-    sel.value = eerste.value;
-    switchStudent(eerste.value);
+  if (gefilterd.length === 0 || q === "") {
+    dropdown.style.display = "none";
+    return;
   }
+
+  dropdown.innerHTML = gefilterd.map((l) => `
+    <div onclick="selecteerLeerling('${l.LeerlingId}', '${l.Title} ${l.Klas || ''}')"
+      style="padding:var(--space-2) var(--space-3);cursor:pointer;font-size:var(--text-sm);"
+      onmouseover="this.style.background='var(--color-surface-offset)'"
+      onmouseout="this.style.background=''">
+      ${l.Title} <span style="color:var(--color-text-muted)">${l.Klas || ""}</span>
+    </div>
+  `).join("");
+
+  dropdown.style.display = "block";
 }
+
+function selecteerLeerling(id, naam) {
+  document.getElementById("studentSearch").value = naam;
+  document.getElementById("studentDropdown").style.display = "none";
+  currentStudent = id;
+  SECTIONS.forEach((s) => {
+    document.getElementById(`entries-${s}`).innerHTML = "";
+    updateCount(s);
+  });
+  loadFromBackend(id);
+}
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".search-wrapper")) {
+    document.getElementById("studentDropdown").style.display = "none";
+  }
+});
     async function laadAlleLeerlingen() {
   const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f3efa19d88d14b0d9d025cd3b482c70e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gGokIvwYQXwWiLUV_aKWDP1nHIRWIdJzS07dB9VNHa4";
   try {
@@ -1539,6 +1581,7 @@ async function loadFromBackend(leerlingId) {
     const text = await res.text();
     const leerlingen = JSON.parse(text);
     if (!leerlingen || !leerlingen.length) return;
+    alleLeerlingenData = leerlingen;
 
     const sel = document.getElementById("studentSelect");
     sel.innerHTML = ""; // bestaande opties verwijderen
