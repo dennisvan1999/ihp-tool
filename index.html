@@ -1483,8 +1483,25 @@ async function loadFromBackend(leerlingId) {
       body: JSON.stringify({ leerlingId }),
     });
     if (!res.ok) return;
-    const data = await res.json();
+    const text = await res.text();
+    console.log("Raw response:", text);
+    const arr = JSON.parse(text);
+    const data = arr[0];
     if (!data) return;
+    console.log("Data van SharePoint:", data);
+
+    document.getElementById("f-naam").value = data.Title || "";
+    document.getElementById("f-klas").value = data.Klas || "";
+    document.getElementById("f-lb").value = data.LB || "";
+    document.getElementById("f-kd").value = data.KD || "";
+    document.getElementById("f-periode").value = data.Periode || "";
+    document.getElementById("ooz-onderwijs").value = data.OOZ_Onderwijs || "";
+    document.getElementById("ooz-opvoeding").value = data.OOZ_Opvoeding || "";
+    document.getElementById("ooz-zorg").value = data.OOZ_Zorg || "";
+  } catch (err) {
+    console.error("Laden mislukt:", err);
+  }
+}
 
     // Basisgegevens invullen
     document.getElementById("f-naam").value = data.Title || "";
