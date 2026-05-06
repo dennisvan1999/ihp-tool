@@ -1307,36 +1307,44 @@
       document.getElementById("studentModal").classList.remove("open");
     }
     function saveStudent() {
-      const name = document.getElementById("m-naam").value.trim();
-      if (!name) {
-        document.getElementById("m-naam").focus();
-        return;
-      }
-      const klas = document.getElementById("m-klas").value.trim();
-      const lb = document.getElementById("m-lb").value.trim();
-      const key = "s" + Date.now();
+  const name = document.getElementById("m-naam").value.trim();
+  if (!name) {
+    document.getElementById("m-naam").focus();
+    return;
+  }
+  const klas = document.getElementById("m-klas").value.trim();
+  const lb = document.getElementById("m-lb").value.trim();
+  const key = "s" + Date.now();
 
-      students[key] = {
-        name,
-        klas,
-        lb,
-        kd: "",
-        periode: "",
-        ooz: { onderwijs: "", opvoeding: "", zorg: "" },
-        entries: { leren: [], psych: [], olb: [], prev: [] },
-      };
+  students[key] = {
+    name,
+    klas,
+    lb,
+    kd: "",
+    periode: "",
+    ooz: { onderwijs: "", opvoeding: "", zorg: "" },
+    entries: { leren: [], psych: [], olb: [], prev: [] },
+  };
 
-      const sel = document.getElementById("studentSelect");
-      const opt = document.createElement("option");
-      opt.value = key;
-      opt.textContent = klas ? `${name} ${klas}` : name;
-      sel.appendChild(opt);
-      sel.value = key;
+  alleLeerlingenData.push({
+    LeerlingId: key,
+    Title: name,
+    Klas: klas,
+    LB: lb,
+  });
 
-      switchStudent(key);
-      closeModal();
-      ["m-naam", "m-klas", "m-lb"].forEach((id) => (document.getElementById(id).value = ""));
-    }
+  const search = document.getElementById("studentSearch");
+  if (search) search.value = `${name} ${klas}`;
+
+  currentStudent = key;
+  SECTIONS.forEach((s) => {
+    document.getElementById(`entries-${s}`).innerHTML = "";
+    updateCount(s);
+  });
+
+  closeModal();
+  ["m-naam", "m-klas", "m-lb"].forEach((id) => (document.getElementById(id).value = ""));
+}
 
     // Export (basis, nog zonder per-veld opslag van IHP -> kan later uitgebreid worden)
     function exportJSON() {
