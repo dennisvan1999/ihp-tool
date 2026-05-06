@@ -1266,18 +1266,6 @@
         updateCount(s);
       });
 
-      // leerlinggegevens + OOZ vullen
-      const s = students[key];
-      document.getElementById("f-naam").value = s.name || "";
-      document.getElementById("f-klas").value = s.klas || "";
-      document.getElementById("f-lb").value = s.lb || "";
-      document.getElementById("f-kd").value = s.kd || "";
-      document.getElementById("f-periode").value = s.periode || "";
-      document.getElementById("ooz-onderwijs").value = s.ooz.onderwijs || "";
-      document.getElementById("ooz-opvoeding").value = s.ooz.opvoeding || "";
-      document.getElementById("ooz-zorg").value = s.ooz.zorg || "";
-    }
-
     // Modal
     function openModal() {
       document.getElementById("studentModal").classList.add("open");
