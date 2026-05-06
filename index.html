@@ -1382,7 +1382,7 @@ let msalInstance;
 async function getToken() {
   const accounts = msalInstance.getAllAccounts();
   const request = {
-    scopes: ["https://service.flow.microsoft.com//.default"],
+    scopes: ["https://service.flow.microsoft.com/Flows.Read.All"],
     account: accounts[0] || undefined,
   };
   try {
