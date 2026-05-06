@@ -1492,19 +1492,6 @@ async function loadFromBackend(leerlingId) {
   }
 }
 
-    // Basisgegevens invullen
-    document.getElementById("f-naam").value = data.Title || "";
-    document.getElementById("f-klas").value = data.Klas || "";
-    document.getElementById("f-lb").value = data.LB || "";
-    document.getElementById("f-kd").value = data.KD || "";
-    document.getElementById("f-periode").value = data.Periode || "";
-    document.getElementById("ooz-onderwijs").value = data.OOZ_Onderwijs || "";
-    document.getElementById("ooz-opvoeding").value = data.OOZ_Opvoeding || "";
-    document.getElementById("ooz-zorg").value = data.OOZ_Zorg || "";
-  } catch (err) {
-    console.error("Laden mislukt:", err);
-  }
-}  
 // Init default student
     switchStudent("s1");
   </script>
