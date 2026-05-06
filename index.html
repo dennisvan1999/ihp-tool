@@ -1374,8 +1374,11 @@ const msalConfig = {
   }
 };
 
-const msalInstance = new msal.PublicClientApplication(msalConfig);
-await msalInstance.initialize();
+let msalInstance;
+(async () => {
+  msalInstance = new msal.PublicClientApplication(msalConfig);
+  await msalInstance.initialize();
+})();
 
 async function getToken() {
   const accounts = msalInstance.getAllAccounts();
