@@ -1668,18 +1668,10 @@ document.addEventListener("click", (e) => {
     const text = await res.text();
     const leerlingen = JSON.parse(text);
     if (!leerlingen || !leerlingen.length) return;
+
     alleLeerlingenData = leerlingen;
 
-    const sel = document.getElementById("studentSelect");
-    sel.innerHTML = ""; // bestaande opties verwijderen
-
     leerlingen.forEach((l) => {
-      const opt = document.createElement("option");
-      opt.value = l.LeerlingId;
-      opt.textContent = l.Klas ? `${l.Title} ${l.Klas}` : l.Title;
-      sel.appendChild(opt);
-
-      // ook toevoegen aan students object
       students[l.LeerlingId] = {
         name: l.Title,
         klas: l.Klas || "",
@@ -1698,7 +1690,8 @@ document.addEventListener("click", (e) => {
     // eerste leerling automatisch laden
     if (leerlingen.length > 0) {
       currentStudent = leerlingen[0].LeerlingId;
-      sel.value = currentStudent;
+      const search = document.getElementById("studentSearch");
+      if (search) search.value = `${leerlingen[0].Title} ${leerlingen[0].Klas || ""}`;
       loadFromBackend(currentStudent);
     }
   } catch (err) {
