@@ -1518,6 +1518,93 @@ async function loadFromBackend(leerlingId) {
     document.getElementById("ooz-onderwijs").value = data.OOZ_Onderwijs || "";
     document.getElementById("ooz-opvoeding").value = data.OOZ_Opvoeding || "";
     document.getElementById("ooz-zorg").value = data.OOZ_Zorg || "";
+    
+    // Handelingsplannen laden vanuit IHP_JSON
+if (data.IHP_JSON && data.IHP_JSON !== "[]") {
+  try {
+    const ihpData = JSON.parse(data.IHP_JSON);
+    ihpData.forEach((plan) => {
+      const sec = plan.domein;
+      if (!SECTIONS.includes(sec)) return;
+
+      addIHP(sec);
+
+      const entries = document.querySelectorAll(`#entries-${sec} .ihp-entry`);
+      const entry = entries[entries.length - 1];
+      if (!entry) return;
+
+      const id = entry.id.replace("ihp-", "");
+      const textareas = entry.querySelectorAll(".ihp-body > .ihp-section > .field-textarea");
+      if (textareas[0]) textareas[0].value = plan.situatieschets || "";
+      if (textareas[1]) textareas[1].value = plan.analyse || "";
+
+      // Doelen
+      const doelenList = document.getElementById(`doelen-${id}`);
+      if (doelenList && plan.doelen && plan.doelen.length > 0) {
+        doelenList.innerHTML = "";
+        plan.doelen.forEach((doel) => {
+          const item = document.createElement("div");
+          item.className = "doel-item";
+          item.style.cssText = "display:grid;grid-template-columns:1fr auto;gap:0.5rem;align-items:flex-start;";
+          item.innerHTML = `
+            <textarea class="field-textarea" style="min-height:64px;">${doel}</textarea>
+            <button class="btn-row-del" type="button" onclick="delDoel(this)">✕</button>
+          `;
+          doelenList.appendChild(item);
+        });
+      }
+
+      // Aanpak
+      const aanpakBody = document.getElementById(`aanpak-body-${id}`);
+      if (aanpakBody && plan.aanpak && plan.aanpak.length > 0) {
+        aanpakBody.innerHTML = "";
+        plan.aanpak.forEach((rij) => {
+          const rowId = `${id}-r${aanpakRowCounter++}`;
+          const tr = document.createElement("tr");
+          tr.id = `aanpak-row-${rowId}`;
+          tr.innerHTML = `
+            <td><textarea class="field-textarea" style="min-height:56px;">${rij.wat || ""}</textarea></td>
+            <td><input class="field-input" type="text" value="${rij.wie || ""}" /></td>
+            <td><input class="field-input" type="text" value="${rij.wanneer || ""}" /></td>
+            <td><input class="field-input" type="text" value="${rij.evaluatie || ""}" /></td>
+            <td>
+              <button class="btn-row-del" type="button"
+                onclick="delAanpakRow('${rowId}')">✕</button>
+            </td>
+          `;
+          aanpakBody.appendChild(tr);
+        });
+      }
+
+      // Evaluaties
+      const evalList = document.getElementById(`evaluaties-${id}`);
+      if (evalList && plan.evaluaties && plan.evaluaties.length > 0) {
+        evalList.innerHTML = "";
+        plan.evaluaties.forEach((ev) => {
+          const item = document.createElement("div");
+          item.className = "eval-item";
+          item.innerHTML = `
+            <div class="eval-grid">
+              <div class="eval-label">Datum</div>
+              <div><input class="field-input" type="text" value="${ev.datum || ""}" /></div>
+              <div class="eval-label">Type</div>
+              <div><input class="field-input" type="text" value="${ev.type || ""}" /></div>
+            </div>
+            <div style="margin-top:0.5rem;display:grid;grid-template-columns:120px 1fr auto;gap:0.75rem;">
+              <div class="eval-label">Bevinding</div>
+              <textarea class="field-textarea" style="min-height:64px;">${ev.bevinding || ""}</textarea>
+              <button class="btn-row-del" type="button"
+                onclick="this.closest('.eval-item').remove()">✕</button>
+            </div>
+          `;
+          evalList.appendChild(item);
+        });
+      }
+    });
+  } catch (e) {
+    console.error("IHP_JSON parse fout:", e);
+  }
+}
   } catch (err) {
     console.error("Laden mislukt:", err);
   }
