@@ -1328,7 +1328,7 @@
     function closeModal() {
       document.getElementById("studentModal").classList.remove("open");
     }
-    function saveStudent() {
+    async function saveStudent() {
   const name = document.getElementById("m-naam").value.trim();
   if (!name) {
     document.getElementById("m-naam").focus();
@@ -1338,34 +1338,80 @@
   const lb = document.getElementById("m-lb").value.trim();
   const key = "s" + Date.now();
 
-  students[key] = {
-    name,
-    klas,
-    lb,
-    kd: "",
-    periode: "",
-    ooz: { onderwijs: "", opvoeding: "", zorg: "" },
-    entries: { leren: [], psych: [], olb: [], prev: [] },
+  const body = {
+    leerlingId: key,
+    metadata: {
+      naam: name,
+      klas: klas,
+      lb: lb,
+      kd: "",
+      periode: "",
+    },
+    ooz: {
+      onderwijs: "",
+      opvoeding: "",
+      zorg: "",
+    },
+    actief_domein: "leren",
+    ihp_leren: [],
+    ihp_psych: [],
+    ihp_olb: [],
+    ihp_prev: [],
   };
 
-  alleLeerlingenData.push({
-    LeerlingId: key,
-    Title: name,
-    Klas: klas,
-    LB: lb,
-  });
+  const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/252d3c81492b43fca07c5ecfa971f0f7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wqbAR6S1j-Xp7T-yUqL6Mz1RZPnJcqcjyy8WHb8lZpc";
 
-  const search = document.getElementById("studentSearch");
-  if (search) search.value = `${name} ${klas}`;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      alert("Leerling toevoegen mislukt.");
+      return;
+    }
 
-  currentStudent = key;
-  SECTIONS.forEach((s) => {
-    document.getElementById(`entries-${s}`).innerHTML = "";
-    updateCount(s);
-  });
+    students[key] = {
+      name, klas, lb,
+      kd: "", periode: "",
+      ooz: { onderwijs: "", opvoeding: "", zorg: "" },
+      entries: { leren: [], olb: [], psych: [], prev: [] },
+    };
 
-  closeModal();
-  ["m-naam", "m-klas", "m-lb"].forEach((id) => (document.getElementById(id).value = ""));
+    alleLeerlingenData.push({
+      LeerlingId: key,
+      Title: name,
+      Klas: klas,
+      LB: lb,
+    });
+
+    const search = document.getElementById("studentSearch");
+    if (search) search.value = `${name} ${klas}`;
+
+    currentStudent = key;
+    SECTIONS.forEach((s) => {
+      document.getElementById(`entries-${s}`).innerHTML = "";
+      updateCount(s);
+    });
+
+    document.getElementById("f-naam").value = name;
+    document.getElementById("f-klas").value = klas;
+    document.getElementById("f-lb").value = lb;
+    document.getElementById("f-kd").value = "";
+    document.getElementById("f-periode").value = "";
+    document.getElementById("ooz-onderwijs").value = "";
+    document.getElementById("ooz-opvoeding").value = "";
+    document.getElementById("ooz-zorg").value = "";
+
+    closeModal();
+    ["m-naam", "m-klas", "m-lb"].forEach((id) => (document.getElementById(id).value = ""));
+    alert(`Leerling ${name} succesvol toegevoegd!`);
+
+  } catch (err) {
+    console.error(err);
+    alert("Er ging iets mis bij het toevoegen.");
+  }
 }
 
     // Export (basis, nog zonder per-veld opslag van IHP -> kan later uitgebreid worden)
