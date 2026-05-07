@@ -1095,10 +1095,13 @@
       return `
 <div class="ihp-entry" id="ihp-${id}">
   <div class="ihp-entry-header">
-    <div class="ihp-entry-label">
-      <span class="num">${num}</span>
-      Handelingsplan
-    </div>
+   <div class="ihp-entry-label">
+  <span class="num">${num}</span>
+  <input class="field-input" type="text" 
+    placeholder="Omschrijf het doel..."
+    style="font-weight:700;font-size:var(--text-sm);border:none;background:transparent;padding:0;width:300px;"
+    onclick="event.stopPropagation()" />
+</div>
     <div class="ihp-entry-meta">
       <span class="entry-date-badge">Aangemaakt ${date}</span>
       <button class="btn-delete" type="button"
