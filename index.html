@@ -1448,8 +1448,12 @@ async function getToken() {
 async function saveToBackend() {
   const leerlingId = currentStudent;
 
-  const ihp = [];
+  async function saveToBackend() {
+  const leerlingId = currentStudent;
+
+  const ihpPerDomein = {};
   SECTIONS.forEach((sec) => {
+    const plannen = [];
     document.querySelectorAll(`#entries-${sec} .ihp-entry`).forEach((entry) => {
       const id = entry.id.replace("ihp-", "");
       const textareas = entry.querySelectorAll(".ihp-body > .ihp-section > .field-textarea");
@@ -1485,8 +1489,9 @@ async function saveToBackend() {
         });
       });
 
-      ihp.push({ id: id, domein: sec, situatieschets, analyse, doelen, aanpak, evaluaties });
+      plannen.push({ id, domein: sec, situatieschets, analyse, doelen, aanpak, evaluaties });
     });
+    ihpPerDomein[sec] = plannen;
   });
 
   const body = {
@@ -1503,7 +1508,31 @@ async function saveToBackend() {
       opvoeding: document.getElementById("ooz-opvoeding").value,
       zorg: document.getElementById("ooz-zorg").value,
     },
-    ihp,
+    ihp_leren: ihpPerDomein["leren"],
+    ihp_psych: ihpPerDomein["psych"],
+    ihp_olb: ihpPerDomein["olb"],
+    ihp_prev: ihpPerDomein["prev"],
+  };
+
+  const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/252d3c81492b43fca07c5ecfa971f0f7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wqbAR6S1j-Xp7T-yUqL6Mz1RZPnJcqcjyy8WHb8lZpc";
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      alert("Opslaan mislukt (HTTP " + res.status + ").");
+      return;
+    }
+    alert("Dossier opgeslagen in M365!");
+  } catch (err) {
+    console.error(err);
+    alert("Er ging iets mis bij het verbinden met M365.");
+  }
+}
   };
   const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/252d3c81492b43fca07c5ecfa971f0f7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wqbAR6S1j-Xp7T-yUqL6Mz1RZPnJcqcjyy8WHb8lZpc";
     try {
