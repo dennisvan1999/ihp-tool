@@ -1719,6 +1719,19 @@ async function vereisLogin() {
   }
 }
 
+async function vereisLogin() {
+  try {
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length === 0) {
+      await msalInstance.loginPopup({
+        scopes: ["User.Read"],
+      });
+    }
+  } catch (err) {
+    document.body.innerHTML = "<p style='padding:2rem'>Je moet inloggen met een schoolaccount om deze tool te gebruiken.</p>";
+  }
+}
+
 // Init: login verplichten en daarna leerlingen laden
 vereisLogin().then(() => laadAlleLeerlingen());
   </script>
