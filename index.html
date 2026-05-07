@@ -1744,7 +1744,7 @@ document.addEventListener("click", (e) => {
   const naam = document.getElementById("f-naam").value || currentStudent;
   if (!confirm(`Ben je zeker dat je ${naam} wilt verwijderen? Dit kan niet ongedaan worden.`)) return;
 
-  const url = "JOUW_VERWIJDER_FLOW_URL";
+  const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/9c89ae29375e48eaa7516756dabdd63d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=OVmDyoXHg8j2NnXdpdr_ufJ2j4VEnGb43AQ7LHh_-V4";
 
   try {
     const res = await fetch(url, {
