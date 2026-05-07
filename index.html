@@ -865,6 +865,7 @@
   "></div>
 </div>
       <button class="btn btn-ghost btn-sm" onclick="openModal()">Leerling toevoegen</button>
+      <button class="btn btn-ghost btn-sm" onclick="verwijderLeerling()" style="color:var(--color-error);border-color:var(--color-error);">Leerling verwijderen</button>
       <button class="btn btn-ghost btn-sm" onclick="exportJSON()">Exporteer JSON</button>
       <button class="btn btn-primary btn-sm" onclick="saveToBackend()">Opslaan naar M365</button>
     </div>
@@ -1738,6 +1739,55 @@ document.addEventListener("click", (e) => {
     document.getElementById("studentDropdown").style.display = "none";
   }
 });
+    async function verwijderLeerling() {
+  if (!currentStudent) return;
+  const naam = document.getElementById("f-naam").value || currentStudent;
+  if (!confirm(`Ben je zeker dat je ${naam} wilt verwijderen? Dit kan niet ongedaan worden.`)) return;
+
+  const url = "JOUW_VERWIJDER_FLOW_URL";
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ leerlingId: currentStudent }),
+    });
+    if (!res.ok) {
+      alert("Verwijderen mislukt.");
+      return;
+    }
+
+    // uit lokale data verwijderen
+    alleLeerlingenData = alleLeerlingenData.filter(l => l.LeerlingId !== currentStudent);
+    delete students[currentStudent];
+
+    // zoekbalk leegmaken
+    const search = document.getElementById("studentSearch");
+    if (search) search.value = "";
+
+    // eerste leerling laden
+    if (alleLeerlingenData.length > 0) {
+      currentStudent = alleLeerlingenData[0].LeerlingId;
+      if (search) search.value = `${alleLeerlingenData[0].Title} ${alleLeerlingenData[0].Klas || ""}`;
+      loadFromBackend(currentStudent);
+      SECTIONS.forEach(s => {
+        document.getElementById(`entries-${s}`).innerHTML = "";
+        updateCount(s);
+      });
+    } else {
+      currentStudent = null;
+      SECTIONS.forEach(s => {
+        document.getElementById(`entries-${s}`).innerHTML = "";
+        updateCount(s);
+      });
+    }
+
+    alert(`${naam} is verwijderd.`);
+  } catch (err) {
+    console.error(err);
+    alert("Er ging iets mis bij het verwijderen.");
+  }
+}
     async function laadAlleLeerlingen() {
   const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f3efa19d88d14b0d9d025cd3b482c70e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gGokIvwYQXwWiLUV_aKWDP1nHIRWIdJzS07dB9VNHa4";
   try {
