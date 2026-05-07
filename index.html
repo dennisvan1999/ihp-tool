@@ -1125,51 +1125,12 @@
     </div>
 
     <div class="ihp-section">
-      <div class="ihp-section-title">Doelen (SMART en positief geformuleerd)</div>
-      <div id="doelen-${id}" class="doelen-list" style="display:flex;flex-direction:column;gap:0.75rem;margin-top:0.5rem;">
-        <div class="doel-item"
-          style="display:grid;grid-template-columns:1fr auto;gap:0.5rem;align-items:flex-start;">
-          <textarea class="field-textarea"
-            style="min-height:64px;"
-            placeholder="Na deze periode kan / doet de leerling … (concreet, meetbaar, haalbaar, tijdgebonden)."></textarea>
-          <button class="btn-row-del" type="button"
-            onclick="delDoel(this)"
-            title="Doel verwijderen">✕</button>
-        </div>
-      </div>
-      <button class="btn-row-add" type="button" onclick="addDoel('${id}')">
-        Doel toevoegen
-      </button>
-    </div>
-
-    <div class="ihp-section">
-      <div class="ihp-section-title">Aanpak</div>
-      <table class="aanpak-table">
-        <thead>
-          <tr>
-            <th style="width:40%">Wat (actie / tussenstappen)</th>
-            <th style="width:15%">Wie</th>
-            <th style="width:15%">Timing</th>
-            <th style="width:20%">Hoe evalueren</th>
-            <th style="width:5%"></th>
-          </tr>
-        </thead>
-        <tbody id="aanpak-body-${id}"></tbody>
-      </table>
-      <button class="btn-row-add" type="button" onclick="addAanpakRow('${id}')">
-        Actie toevoegen
-      </button>
-    </div>
-
-    <div class="ihp-section">
-      <div class="ihp-section-title">Evaluatie</div>
-
-      <div id="evaluaties-${id}" class="eval-list"></div>
-
-      <button class="btn-row-add" type="button" onclick="addEvaluatie('${id}')">
-        Plus evaluatie toevoegen
-      </button>
-    </div>
+  <div class="ihp-section-title">Doelen, aanpak en evaluatie</div>
+  <div id="subdoelen-${id}" class="subdoelen-list"></div>
+  <button class="btn-row-add" type="button" onclick="addSubdoel('${id}')">
+    Subdoel toevoegen
+  </button>
+</div>
 
   </div>
 </div>`;
@@ -1251,31 +1212,92 @@
     }
 
     // Doelen
-    function addDoel(entId) {
-      const list = document.getElementById(`doelen-${entId}`);
-      if (!list) return;
-      const item = document.createElement("div");
-      item.className = "doel-item";
-      item.style.cssText =
-        "display:grid;grid-template-columns:1fr auto;gap:0.5rem;align-items:flex-start;";
-      item.innerHTML = `
-        <textarea class="field-textarea" style="min-height:64px;"
-          placeholder="Na deze periode kan / doet de leerling … (concreet, meetbaar, haalbaar, tijdgebonden)."></textarea>
-        <button class="btn-row-del" type="button"
-          onclick="delDoel(this)" title="Doel verwijderen">✕</button>
-      `;
-      list.appendChild(item);
-      item.querySelector("textarea")?.focus();
-    }
+    function addSubdoel(entId) {
+  const list = document.getElementById(`subdoelen-${entId}`);
+  if (!list) return;
 
-    function delDoel(btn) {
-      const item = btn.closest(".doel-item");
-      if (!item) return;
-      const list = item.parentElement;
-      if (list && list.querySelectorAll(".doel-item").length > 1) {
-        item.remove();
-      }
-    }
+  const subId = `${entId}-sub-${Date.now()}`;
+  const item = document.createElement("div");
+  item.className = "subdoel-item";
+  item.id = `subdoel-${subId}`;
+  item.style.cssText = "border:1px solid var(--color-divider);border-radius:var(--radius-lg);padding:var(--space-4);margin-top:var(--space-4);background:var(--color-surface-offset);";
+
+  item.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr auto;gap:0.5rem;align-items:flex-start;margin-bottom:var(--space-3);">
+      <div class="ihp-section-title" style="border:none;margin:0;padding:0;">Subdoel</div>
+      <button class="btn-row-del" type="button"
+        onclick="this.closest('.subdoel-item').remove()"
+        title="Subdoel verwijderen">✕</button>
+    </div>
+
+    <textarea class="field-textarea" style="min-height:64px;margin-bottom:var(--space-3);"
+      placeholder="Na deze periode kan / doet de leerling … (concreet, meetbaar, haalbaar, tijdgebonden)."></textarea>
+
+    <div class="ihp-section-title" style="margin-bottom:var(--space-2);">Aanpak</div>
+    <table class="aanpak-table" style="margin-bottom:var(--space-2);">
+      <thead>
+        <tr>
+          <th style="width:40%">Wat</th>
+          <th style="width:15%">Wie</th>
+          <th style="width:15%">Timing</th>
+          <th style="width:25%">Hoe evalueren</th>
+          <th style="width:5%"></th>
+        </tr>
+      </thead>
+      <tbody id="aanpak-${subId}"></tbody>
+    </table>
+    <button class="btn-row-add" type="button" onclick="addAanpakRijSubdoel('${subId}')">
+      Aanpak toevoegen
+    </button>
+
+    <div class="ihp-section-title" style="margin-top:var(--space-4);margin-bottom:var(--space-2);">Evaluatie</div>
+    <div id="evaluaties-${subId}" class="eval-list"></div>
+    <button class="btn-row-add" type="button" onclick="addEvaluatieSubdoel('${subId}')">
+      Evaluatie toevoegen
+    </button>
+  `;
+
+  list.appendChild(item);
+  addAanpakRijSubdoel(subId);
+  addEvaluatieSubdoel(subId);
+}
+
+function addAanpakRijSubdoel(subId) {
+  const tbody = document.getElementById(`aanpak-${subId}`);
+  if (!tbody) return;
+  const rowId = `${subId}-r${aanpakRowCounter++}`;
+  const tr = document.createElement("tr");
+  tr.id = `aanpak-row-${rowId}`;
+  tr.innerHTML = `
+    <td><textarea class="field-textarea" style="min-height:56px;" placeholder="Beschrijf de actie"></textarea></td>
+    <td><input class="field-input" type="text" placeholder="Naam" /></td>
+    <td><input class="field-input" type="text" placeholder="bv. okt 2025" /></td>
+    <td><input class="field-input" type="text" placeholder="bv. observatie, toets" /></td>
+    <td><button class="btn-row-del" type="button" onclick="delAanpakRow('${rowId}')">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function addEvaluatieSubdoel(subId) {
+  const list = document.getElementById(`evaluaties-${subId}`);
+  if (!list) return;
+  const item = document.createElement("div");
+  item.className = "eval-item";
+  item.innerHTML = `
+    <div class="eval-grid">
+      <div class="eval-label">Datum</div>
+      <div><input class="field-input" type="text" placeholder="bv. 12/05/2026" /></div>
+      <div class="eval-label">Type</div>
+      <div><input class="field-input" type="text" placeholder="tussenevaluatie / eindevaluatie" /></div>
+    </div>
+    <div style="margin-top:0.5rem;display:grid;grid-template-columns:120px 1fr auto;gap:0.75rem;">
+      <div class="eval-label">Bevinding</div>
+      <textarea class="field-textarea" style="min-height:64px;" placeholder="Beschrijf de bevindingen"></textarea>
+      <button class="btn-row-del" type="button" onclick="this.closest('.eval-item').remove()">✕</button>
+    </div>
+  `;
+  list.appendChild(item);
+}
 
     // Evaluaties (meerdere per handelingsplan)
     function addEvaluatie(entId) {
