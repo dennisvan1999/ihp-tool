@@ -1721,6 +1721,7 @@ async function vereisLogin() {
 
 async function vereisLogin() {
   try {
+    await msalInstance.initialize();
     const accounts = msalInstance.getAllAccounts();
     if (accounts.length === 0) {
       await msalInstance.loginPopup({
@@ -1728,7 +1729,15 @@ async function vereisLogin() {
       });
     }
   } catch (err) {
-    document.body.innerHTML = "<p style='padding:2rem'>Je moet inloggen met een schoolaccount om deze tool te gebruiken.</p>";
+    console.error("Login fout:", err);
+    // Probeer redirect als popup geblokkeerd wordt
+    try {
+      await msalInstance.loginRedirect({
+        scopes: ["User.Read"],
+      });
+    } catch (err2) {
+      console.error("Redirect fout:", err2);
+    }
   }
 }
 
