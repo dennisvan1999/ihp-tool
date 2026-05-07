@@ -804,6 +804,23 @@
 </head>
 
 <body>
+  <div id="login-overlay" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:var(--color-bg);
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:var(--space-4);
+">
+  <h2 style="font-size:var(--text-lg)">IHP Tool – Leerlingbegeleiding</h2>
+  <p style="color:var(--color-text-muted)">Log in met je schoolaccount om verder te gaan.</p>
+  <button class="btn btn-primary" onclick="loginEnLaad()">
+    Inloggen met schoolaccount
+  </button>
+</div>
   <header class="topbar">
     <a class="logo" href="#">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
