@@ -1079,6 +1079,7 @@
 
     // Tabs
     function switchTab(sec) {
+      window.activeDomein = sec;
       document.querySelectorAll(".tab").forEach((t) => {
         t.classList.toggle("active", t.dataset.section === sec);
         t.setAttribute("aria-selected", t.dataset.section === sec ? "true" : "false");
@@ -1505,10 +1506,11 @@ async function getToken() {
       opvoeding: document.getElementById("ooz-opvoeding").value,
       zorg: document.getElementById("ooz-zorg").value,
     },
-    ihp_leren: ihpPerDomein["leren"],
-    ihp_psych: ihpPerDomein["psych"],
-    ihp_olb: ihpPerDomein["olb"],
-    ihp_prev: ihpPerDomein["prev"],
+  actief_domein: window.activeDomein || "leren",
+  ihp_leren: ihpPerDomein["leren"],
+  ihp_psych: ihpPerDomein["psych"],
+  ihp_olb: ihpPerDomein["olb"],
+  ihp_prev: ihpPerDomein["prev"],
  
   };
   const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/252d3c81492b43fca07c5ecfa971f0f7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wqbAR6S1j-Xp7T-yUqL6Mz1RZPnJcqcjyy8WHb8lZpc";
