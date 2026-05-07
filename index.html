@@ -1445,9 +1445,6 @@ async function getToken() {
   }
 }
 
-async function saveToBackend() {
-  const leerlingId = currentStudent;
-
   async function saveToBackend() {
   const leerlingId = currentStudent;
 
@@ -1512,27 +1509,7 @@ async function saveToBackend() {
     ihp_psych: ihpPerDomein["psych"],
     ihp_olb: ihpPerDomein["olb"],
     ihp_prev: ihpPerDomein["prev"],
-  };
-
-  const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/252d3c81492b43fca07c5ecfa971f0f7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wqbAR6S1j-Xp7T-yUqL6Mz1RZPnJcqcjyy8WHb8lZpc";
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      alert("Opslaan mislukt (HTTP " + res.status + ").");
-      return;
-    }
-    alert("Dossier opgeslagen in M365!");
-  } catch (err) {
-    console.error(err);
-    alert("Er ging iets mis bij het verbinden met M365.");
-  }
-}
+ 
   };
   const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/252d3c81492b43fca07c5ecfa971f0f7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wqbAR6S1j-Xp7T-yUqL6Mz1RZPnJcqcjyy8WHb8lZpc";
     try {
@@ -1578,14 +1555,19 @@ async function loadFromBackend(leerlingId) {
     document.getElementById("ooz-opvoeding").value = data.OOZ_Opvoeding || "";
     document.getElementById("ooz-zorg").value = data.OOZ_Zorg || "";
     
-    // Handelingsplannen laden vanuit IHP_JSON
-if (data.IHP_JSON && data.IHP_JSON !== "[]") {
-  try {
-    const ihpData = JSON.parse(data.IHP_JSON);
-    ihpData.forEach((plan) => {
-      const sec = plan.domein;
-      if (!SECTIONS.includes(sec)) return;
+    // Handelingsplannen laden 
+const domeinen = {
+  leren: data.IHP_Leren,
+  psych: data.IHP_Psych,
+  olb: data.IHP_OLB,
+  prev: data.IHP_Prev,
+};
 
+Object.entries(domeinen).forEach(([sec, jsonStr]) => {
+  if (!jsonStr || jsonStr === "[]") return;
+  try {
+    const plannen = JSON.parse(jsonStr);
+    plannen.forEach((plan) => {
       addIHP(sec, plan.id || undefined);
 
       const entries = document.querySelectorAll(`#entries-${sec} .ihp-entry`);
@@ -1597,7 +1579,6 @@ if (data.IHP_JSON && data.IHP_JSON !== "[]") {
       if (textareas[0]) textareas[0].value = plan.situatieschets || "";
       if (textareas[1]) textareas[1].value = plan.analyse || "";
 
-      // Doelen
       const doelenList = document.getElementById(`doelen-${id}`);
       if (doelenList && plan.doelen && plan.doelen.length > 0) {
         doelenList.innerHTML = "";
@@ -1613,7 +1594,6 @@ if (data.IHP_JSON && data.IHP_JSON !== "[]") {
         });
       }
 
-      // Aanpak
       const aanpakBody = document.getElementById(`aanpak-body-${id}`);
       if (aanpakBody && plan.aanpak && plan.aanpak.length > 0) {
         aanpakBody.innerHTML = "";
@@ -1626,16 +1606,12 @@ if (data.IHP_JSON && data.IHP_JSON !== "[]") {
             <td><input class="field-input" type="text" value="${rij.wie || ""}" /></td>
             <td><input class="field-input" type="text" value="${rij.wanneer || ""}" /></td>
             <td><input class="field-input" type="text" value="${rij.evaluatie || ""}" /></td>
-            <td>
-              <button class="btn-row-del" type="button"
-                onclick="delAanpakRow('${rowId}')">✕</button>
-            </td>
+            <td><button class="btn-row-del" type="button" onclick="delAanpakRow('${rowId}')">✕</button></td>
           `;
           aanpakBody.appendChild(tr);
         });
       }
 
-      // Evaluaties
       const evalList = document.getElementById(`evaluaties-${id}`);
       if (evalList && plan.evaluaties && plan.evaluaties.length > 0) {
         evalList.innerHTML = "";
@@ -1652,8 +1628,7 @@ if (data.IHP_JSON && data.IHP_JSON !== "[]") {
             <div style="margin-top:0.5rem;display:grid;grid-template-columns:120px 1fr auto;gap:0.75rem;">
               <div class="eval-label">Bevinding</div>
               <textarea class="field-textarea" style="min-height:64px;">${ev.bevinding || ""}</textarea>
-              <button class="btn-row-del" type="button"
-                onclick="this.closest('.eval-item').remove()">✕</button>
+              <button class="btn-row-del" type="button" onclick="this.closest('.eval-item').remove()">✕</button>
             </div>
           `;
           evalList.appendChild(item);
@@ -1661,9 +1636,9 @@ if (data.IHP_JSON && data.IHP_JSON !== "[]") {
       }
     });
   } catch (e) {
-    console.error("IHP_JSON parse fout:", e);
+    console.error("Parse fout voor domein", sec, e);
   }
-}
+});
   } catch (err) {
     console.error("Laden mislukt:", err);
   }
