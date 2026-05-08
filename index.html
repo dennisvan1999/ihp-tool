@@ -1526,13 +1526,12 @@ async function getToken() {
 }
 
   async function saveToBackend(isAuto = false) {
-  console.log("saveToBackend called", { isAuto, leerlingId });
   if (isSaving) return;
   // voorkom overlappende saves
   isSaving = true;
 
   const leerlingId = currentStudent;
-
+  console.log("saveToBackend called", { isAuto, leerlingId });
   const ihpPerDomein = {};
   SECTIONS.forEach((sec) => {
     const plannen = [];
