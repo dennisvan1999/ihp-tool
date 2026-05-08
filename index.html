@@ -1086,6 +1086,54 @@
     function markDirty() {
   hasUnsavedChanges = true;
 }
+    // AES-GCM encryptie via Web Crypto API (ingebouwd in browser, geen extra lib nodig)
+const CRYPTO_KEY_RAW = "ihp-sleutel-2026-scholengroep!!"; // 32 tekens = 256 bit
+
+async function getEncryptKey() {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(CRYPTO_KEY_RAW),
+    { name: "AES-GCM" },
+    false,
+    ["encrypt", "decrypt"]
+  );
+  return keyMaterial;
+}
+
+async function encryptText(plaintext) {
+  const enc = new TextEncoder();
+  const key = await getEncryptKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    enc.encode(plaintext)
+  );
+  // iv + ciphertext samenvoegen en als base64 opslaan
+  const combined = new Uint8Array(iv.byteLength + encrypted.byteLength);
+  combined.set(iv, 0);
+  combined.set(new Uint8Array(encrypted), iv.byteLength);
+  return btoa(String.fromCharCode(...combined));
+}
+
+async function decryptText(base64) {
+  try {
+    const dec = new TextDecoder();
+    const key = await getEncryptKey();
+    const combined = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+    const iv = combined.slice(0, 12);
+    const data = combined.slice(12);
+    const decrypted = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv },
+      key,
+      data
+    );
+    return dec.decode(decrypted);
+  } catch {
+    return ""; // als decryptie mislukt, lege string terug
+  }
+}
     // Tabs
     function switchTab(sec) {
       window.activeDomein = sec;
@@ -1373,7 +1421,11 @@ function addEvaluatieSubdoel(subId) {
   const lb = document.getElementById("m-lb").value.trim();
   const key = "s" + Date.now();
 
-  const body = {
+  const idBody = {
+    leerlingId: key,
+  };
+
+  const ihpBody = {
     leerlingId: key,
     metadata: {
       naam: name,
@@ -1382,11 +1434,7 @@ function addEvaluatieSubdoel(subId) {
       kd: "",
       periode: "",
     },
-    ooz: {
-      onderwijs: "",
-      opvoeding: "",
-      zorg: "",
-    },
+    ooz: { onderwijs: "", opvoeding: "", zorg: "" },
     actief_domein: "leren",
     ihp_leren: [],
     ihp_psych: [],
@@ -1394,15 +1442,25 @@ function addEvaluatieSubdoel(subId) {
     ihp_prev: [],
   };
 
-  const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/252d3c81492b43fca07c5ecfa971f0f7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wqbAR6S1j-Xp7T-yUqL6Mz1RZPnJcqcjyy8WHb8lZpc";
+  const idUrl = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/e1a21cefc1074f54940eccec27f2c5b9/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2LM8J8Fp-5J78ScxvFpj0wy1ljthLNVO8ziJsm4b8Jg";
+
+  const ihpUrl = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/252d3c81492b43fca07c5ecfa971f0f7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wqbAR6S1j-Xp7T-yUqL6Mz1RZPnJcqcjyy8WHb8lZpc";
 
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
+    const [idRes, ihpRes] = await Promise.all([
+      fetch(idUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(idBody),
+      }),
+      fetch(ihpUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ihpBody),
+      }),
+    ]);
+
+    if (!idRes.ok || !ihpRes.ok) {
       alert("Leerling toevoegen mislukt.");
       return;
     }
