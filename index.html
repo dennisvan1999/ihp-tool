@@ -1523,44 +1523,40 @@ async function getToken() {
 
   const ihpPerDomein = {};
   SECTIONS.forEach((sec) => {
-    const plannen = [];
-    document.querySelectorAll(`#entries-${sec} .ihp-entry`).forEach((entry) => {
-      const id = entry.id.replace("ihp-", "");
-      const textareas = entry.querySelectorAll(".ihp-body > .ihp-section > .field-textarea");
-      const situatieschets = textareas[0]?.value || "";
-      const analyse = textareas[1]?.value || "";
+    const subdoelen = [];
+entry.querySelectorAll(`#subdoelen-${id} .subdoel-item`).forEach((sub) => {
+  const subId = sub.id.replace("subdoel-", "");
+  const tekst = sub.querySelector("textarea")?.value || "";
+  const titel = sub.querySelector("input.field-input")?.value || "";
 
-      const doelen = [];
-      entry.querySelectorAll(`#doelen-${id} .doel-item textarea`).forEach((t) => {
-        if (t.value.trim()) doelen.push(t.value.trim());
+  const aanpak = [];
+  sub.querySelectorAll(`#aanpak-${subId} tr`).forEach((row) => {
+    const inputs = row.querySelectorAll("input, textarea");
+    if (inputs.length >= 4) {
+      aanpak.push({
+        wat: inputs[0]?.value || "",
+        wie: inputs[1]?.value || "",
+        wanneer: inputs[2]?.value || "",
+        evaluatie: inputs[3]?.value || "",
       });
+    }
+  });
 
-      const aanpak = [];
-      entry.querySelectorAll(`#aanpak-body-${id} tr`).forEach((row) => {
-        const inputs = row.querySelectorAll("input, textarea");
-        if (inputs.length >= 4) {
-          aanpak.push({
-            wat: inputs[0]?.value || "",
-            wie: inputs[1]?.value || "",
-            wanneer: inputs[2]?.value || "",
-            evaluatie: inputs[3]?.value || "",
-          });
-        }
-      });
-
-      const evaluaties = [];
-      entry.querySelectorAll(`#evaluaties-${id} .eval-item`).forEach((ev) => {
-        const inputs = ev.querySelectorAll("input");
-        const textarea = ev.querySelector("textarea");
-        evaluaties.push({
-          datum: inputs[0]?.value || "",
-          type: inputs[1]?.value || "",
-          bevinding: textarea?.value || "",
-        });
-      });
-
-      plannen.push({ id, domein: sec, situatieschets, analyse, doelen, aanpak, evaluaties });
+  const evaluaties = [];
+  sub.querySelectorAll(`#evaluaties-${subId} .eval-item`).forEach((ev) => {
+    const inputs = ev.querySelectorAll("input");
+    const textarea = ev.querySelector("textarea");
+    evaluaties.push({
+      datum: inputs[0]?.value || "",
+      type: inputs[1]?.value || "",
+      bevinding: textarea?.value || "",
     });
+  });
+
+  subdoelen.push({ subId, titel, tekst, aanpak, evaluaties });
+});
+
+plannen.push({ id, domein: sec, situatieschets, analyse, subdoelen });
     ihpPerDomein[sec] = plannen;
   });
 
