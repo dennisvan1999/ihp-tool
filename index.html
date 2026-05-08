@@ -1081,6 +1081,10 @@
       }
     };
 
+    //Autosave
+    function markDirty() {
+  hasUnsavedChanges = true;
+}
     // Tabs
     function switchTab(sec) {
       window.activeDomein = sec;
@@ -1902,6 +1906,11 @@ async function loginEnLaad() {
     document.getElementById("login-overlay").style.display = "none";
     document.querySelector("main").classList.remove("inhoud-verborgen");
     laadAlleLeerlingen();
+
+    document.querySelectorAll("input, textarea, select").forEach((el) => {
+      el.addEventListener("input", markDirty);
+      el.addEventListener("change", markDirty);
+    });
   } catch (err) {
     console.error("Login fout:", err);
     alert("Inloggen mislukt. Probeer opnieuw.");
@@ -1914,6 +1923,12 @@ msalReady.then(() => {
   } else {
     document.querySelector("main").classList.remove("inhoud-verborgen");
     laadAlleLeerlingen();
+
+    // velden "dirty" maken bij wijziging
+    document.querySelectorAll("input, textarea, select").forEach((el) => {
+      el.addEventListener("input", markDirty);
+      el.addEventListener("change", markDirty);
+    });
   }
 });
   </script>
