@@ -1525,7 +1525,11 @@ async function getToken() {
   }
 }
 
-  async function saveToBackend() {
+  async function saveToBackend(isAuto = false) {
+  if (isSaving) return;
+  // voorkom overlappende saves
+  isSaving = true;
+
   const leerlingId = currentStudent;
 
   const ihpPerDomein = {};
@@ -1621,14 +1625,24 @@ async function getToken() {
       body: JSON.stringify(body),
     });
     if (!res.ok) {
-      alert("Opslaan mislukt (HTTP " + res.status + ").");
-      return;
-    }
-    alert("Dossier opgeslagen in M365!");
+  if (!isAuto) {
+    alert("Opslaan mislukt (HTTP " + res.status + ").");
+  }
+  return;
+}
+hasUnsavedChanges = false;
+lastAutosave = new Date();
+if (!isAuto) {
+  alert("Dossier opgeslagen in M365!");
+}
   } catch (err) {
-    console.error(err);
+  console.error(err);
+  if (!isAuto) {
     alert("Er ging iets mis bij het verbinden met M365.");
   }
+} finally {
+  isSaving = false;
+}
 }
 async function loadFromBackend(leerlingId) {
   const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/5551b0e179e246e1be62f3d333c6e8ba/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=uw16VaBfOad198YTN-Oqc9PQSpQCla-tuSUkw9V6g0I";
@@ -1923,6 +1937,15 @@ msalReady.then(() => {
   } else {
     document.querySelector("main").classList.remove("inhoud-verborgen");
     laadAlleLeerlingen();
+
+    // autosave elke 30s als er wijzigingen zijn
+    setInterval(() => {
+      if (hasUnsavedChanges && !isSaving && currentStudent) {
+        saveToBackend(true); // true = autosave
+      }
+    }, 30000);
+  }
+});
 
     // velden "dirty" maken bij wijziging
     document.querySelectorAll("input, textarea, select").forEach((el) => {
