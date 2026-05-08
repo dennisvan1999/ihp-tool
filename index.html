@@ -1056,6 +1056,9 @@
     const SECTIONS = ["leren", "psych", "olb", "prev"];
     let currentStudent = "s1";
     let entryCounter = 0;
+    let isSaving = false;
+    let hasUnsavedChanges = false;
+    let lastAutosave = null;
 
     const students = {
       s1: {
