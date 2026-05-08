@@ -1531,7 +1531,7 @@ async function getToken() {
   isSaving = true;
 
   const leerlingId = currentStudent;
-  console.log("saveToBackend called", { isAuto, leerlingId });
+  console.log("saveToBackend called", { isAuto: isAuto, leerlingId: leerlingId });
 
   const ihpPerDomein = {};
   SECTIONS.forEach((sec) => {
@@ -1543,12 +1543,12 @@ async function getToken() {
 
       // hoofddoel
       const headerTitleInput = entry.querySelector(".ihp-entry-label input.field-input");
-      const titel = headerTitleInput?.value || "";
+      const titel = headerTitleInput ? headerTitleInput.value : "";
 
       // situatieschets + analyse
       const textareas = entry.querySelectorAll(".ihp-body > .ihp-section > .field-textarea");
-      const situatieschets = textareas[0]?.value || "";
-      const analyse = textareas[1]?.value || "";
+      const situatieschets = textareas[0] ? textareas[0].value : "";
+      const analyse = textareas[1] ? textareas[1].value : "";
 
       const subdoelen = [];
       // alle subdoelen binnen dit handelingsplan
@@ -1556,7 +1556,8 @@ async function getToken() {
         .querySelectorAll(`#subdoelen-${id} .subdoel-item`)
         .forEach((sub) => {
           const subId = sub.id.replace("subdoel-", "");
-          const tekst = sub.querySelector("textarea.field-textarea")?.value || "";
+          const tekstArea = sub.querySelector("textarea.field-textarea");
+          const tekst = tekstArea ? tekstArea.value : "";
 
           const aanpak = [];
           sub
@@ -1565,10 +1566,10 @@ async function getToken() {
               const inputs = row.querySelectorAll("input, textarea");
               if (inputs.length >= 4) {
                 aanpak.push({
-                  wat: inputs[0]?.value || "",
-                  wie: inputs[1]?.value || "",
-                  wanneer: inputs[2]?.value || "",
-                  evaluatie: inputs[3]?.value || "",
+                  wat: inputs[0] ? inputs[0].value : "",
+                  wie: inputs[1] ? inputs[1].value : "",
+                  wanneer: inputs[2] ? inputs[2].value : "",
+                  evaluatie: inputs[3] ? inputs[3].value : "",
                 });
               }
             });
@@ -1580,23 +1581,30 @@ async function getToken() {
               const inputs = ev.querySelectorAll("input");
               const textarea = ev.querySelector("textarea");
               evaluaties.push({
-                datum: inputs[0]?.value || "",
-                type: inputs[1]?.value || "",
-                bevinding: textarea?.value || "",
+                datum: inputs[0] ? inputs[0].value : "",
+                type: inputs[1] ? inputs[1].value : "",
+                bevinding: textarea ? textarea.value : "",
               });
             });
 
-          subdoelen.push({ subId, tekst, aanpak, evaluaties });
+          subdoelen.push({ subId: subId, tekst: tekst, aanpak: aanpak, evaluaties: evaluaties });
         });
 
-      plannen.push({ id, domein: sec, titel, situatieschets, analyse, subdoelen });
+      plannen.push({
+        id: id,
+        domein: sec,
+        titel: titel,
+        situatieschets: situatieschets,
+        analyse: analyse,
+        subdoelen: subdoelen,
+      });
     });
 
     ihpPerDomein[sec] = plannen;
   });
 
   const body = {
-    leerlingId,
+    leerlingId: leerlingId,
     metadata: {
       naam: document.getElementById("f-naam").value,
       klas: document.getElementById("f-klas").value,
@@ -1629,7 +1637,26 @@ async function getToken() {
 
     if (!res.ok) {
       if (!isAuto) {
-        alert("Opslaan mislukt (HTTP " + res.status + 
+        alert("Opslaan mislukt (HTTP " + res.status + ").");
+      }
+      return;
+    }
+
+    hasUnsavedChanges = false;
+    lastAutosave = new Date();
+    if (!isAuto) {
+      alert("Dossier opgeslagen in M365!");
+    }
+  } catch (err) {
+    console.error(err);
+    if (!isAuto) {
+      alert("Er ging iets mis bij het verbinden met M365.");
+    }
+  } finally {
+    isSaving = false;
+  }
+} 
+    
 async function loadFromBackend(leerlingId) {
   const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/5551b0e179e246e1be62f3d333c6e8ba/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=uw16VaBfOad198YTN-Oqc9PQSpQCla-tuSUkw9V6g0I";
   try {
