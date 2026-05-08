@@ -1523,40 +1523,60 @@ async function getToken() {
 
   const ihpPerDomein = {};
   SECTIONS.forEach((sec) => {
-    const subdoelen = [];
-entry.querySelectorAll(`#subdoelen-${id} .subdoel-item`).forEach((sub) => {
-  const subId = sub.id.replace("subdoel-", "");
-  const tekst = sub.querySelector("textarea")?.value || "";
-  const titel = sub.querySelector("input.field-input")?.value || "";
+    const plannen = [];
 
-  const aanpak = [];
-  sub.querySelectorAll(`#aanpak-${subId} tr`).forEach((row) => {
-    const inputs = row.querySelectorAll("input, textarea");
-    if (inputs.length >= 4) {
-      aanpak.push({
-        wat: inputs[0]?.value || "",
-        wie: inputs[1]?.value || "",
-        wanneer: inputs[2]?.value || "",
-        evaluatie: inputs[3]?.value || "",
-      });
-    }
-  });
+    // alle handelingsplannen in dit domein
+    document.querySelectorAll(`#entries-${sec} .ihp-entry`).forEach((entry) => {
+      const id = entry.id.replace("ihp-", "");
 
-  const evaluaties = [];
-  sub.querySelectorAll(`#evaluaties-${subId} .eval-item`).forEach((ev) => {
-    const inputs = ev.querySelectorAll("input");
-    const textarea = ev.querySelector("textarea");
-    evaluaties.push({
-      datum: inputs[0]?.value || "",
-      type: inputs[1]?.value || "",
-      bevinding: textarea?.value || "",
+      // situatieschets + analyse
+      const textareas = entry.querySelectorAll(".ihp-body > .ihp-section > .field-textarea");
+      const situatieschets = textareas[0]?.value || "";
+      const analyse = textareas[1]?.value || "";
+
+      const subdoelen = [];
+      // alle subdoelen binnen dit handelingsplan
+      entry
+        .querySelectorAll(`#subdoelen-${id} .subdoel-item`)
+        .forEach((sub) => {
+          const subId = sub.id.replace("subdoel-", "");
+          const tekst = sub.querySelector("textarea")?.value || "";
+          const titel = sub.querySelector("input.field-input")?.value || "";
+
+          const aanpak = [];
+          sub
+            .querySelectorAll(`#aanpak-${subId} tr`)
+            .forEach((row) => {
+              const inputs = row.querySelectorAll("input, textarea");
+              if (inputs.length >= 4) {
+                aanpak.push({
+                  wat: inputs[0]?.value || "",
+                  wie: inputs[1]?.value || "",
+                  wanneer: inputs[2]?.value || "",
+                  evaluatie: inputs[3]?.value || "",
+                });
+              }
+            });
+
+          const evaluaties = [];
+          sub
+            .querySelectorAll(`#evaluaties-${subId} .eval-item`)
+            .forEach((ev) => {
+              const inputs = ev.querySelectorAll("input");
+              const textarea = ev.querySelector("textarea");
+              evaluaties.push({
+                datum: inputs[0]?.value || "",
+                type: inputs[1]?.value || "",
+                bevinding: textarea?.value || "",
+              });
+            });
+
+          subdoelen.push({ subId, titel, tekst, aanpak, evaluaties });
+        });
+
+      plannen.push({ id, domein: sec, situatieschets, analyse, subdoelen });
     });
-  });
 
-  subdoelen.push({ subId, titel, tekst, aanpak, evaluaties });
-});
-
-plannen.push({ id, domein: sec, situatieschets, analyse, subdoelen });
     ihpPerDomein[sec] = plannen;
   });
 
@@ -1574,20 +1594,19 @@ plannen.push({ id, domein: sec, situatieschets, analyse, subdoelen });
       opvoeding: document.getElementById("ooz-opvoeding").value,
       zorg: document.getElementById("ooz-zorg").value,
     },
-  actief_domein: window.activeDomein || "leren",
-  ihp_leren: ihpPerDomein["leren"],
-  ihp_psych: ihpPerDomein["psych"],
-  ihp_olb: ihpPerDomein["olb"],
-  ihp_prev: ihpPerDomein["prev"],
- 
+    actief_domein: window.activeDomein || "leren",
+    ihp_leren: ihpPerDomein["leren"],
+    ihp_psych: ihpPerDomein["psych"],
+    ihp_olb: ihpPerDomein["olb"],
+    ihp_prev: ihpPerDomein["prev"],
   };
+
   const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/252d3c81492b43fca07c5ecfa971f0f7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wqbAR6S1j-Xp7T-yUqL6Mz1RZPnJcqcjyy8WHb8lZpc";
-    try {
+
+  try {
     const res = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
     if (!res.ok) {
@@ -1626,90 +1645,103 @@ async function loadFromBackend(leerlingId) {
     document.getElementById("ooz-opvoeding").value = data.OOZ_Opvoeding || "";
     document.getElementById("ooz-zorg").value = data.OOZ_Zorg || "";
     
-    // Handelingsplannen laden 
-const domeinen = {
-  leren: data.IHP_Leren,
-  psych: data.IHP_Psych,
-  olb: data.IHP_OLB,
-  prev: data.IHP_Prev,
-};
+        // Handelingsplannen laden op basis van nieuwe structuur met subdoelen
+    const domeinen = {
+      leren: data.IHP_Leren,
+      psych: data.IHP_Psych,
+      olb: data.IHP_OLB,
+      prev: data.IHP_Prev,
+    };
 
-Object.entries(domeinen).forEach(([sec, jsonStr]) => {
-  if (!jsonStr || jsonStr === "[]") return;
-  try {
-    const plannen = JSON.parse(jsonStr);
-    plannen.forEach((plan) => {
-      addIHP(sec, plan.id || undefined);
+    Object.entries(domeinen).forEach(([sec, jsonStr]) => {
+      if (!jsonStr || jsonStr === "[]") return;
+      try {
+        const plannen = JSON.parse(jsonStr);
+        plannen.forEach((plan) => {
+          // nieuw handelingsplan toevoegen
+          addIHP(sec);
 
-      const entries = document.querySelectorAll(`#entries-${sec} .ihp-entry`);
-      const entry = entries[entries.length - 1];
-      if (!entry) return;
+          const entries = document.querySelectorAll(`#entries-${sec} .ihp-entry`);
+          const entry = entries[entries.length - 1];
+          if (!entry) return;
 
-      const id = entry.id.replace("ihp-", "");
-      const textareas = entry.querySelectorAll(".ihp-body > .ihp-section > .field-textarea");
-      if (textareas[0]) textareas[0].value = plan.situatieschets || "";
-      if (textareas[1]) textareas[1].value = plan.analyse || "";
+          const id = entry.id.replace("ihp-", "");
 
-      const doelenList = document.getElementById(`doelen-${id}`);
-      if (doelenList && plan.doelen && plan.doelen.length > 0) {
-        doelenList.innerHTML = "";
-        plan.doelen.forEach((doel) => {
-          const item = document.createElement("div");
-          item.className = "doel-item";
-          item.style.cssText = "display:grid;grid-template-columns:1fr auto;gap:0.5rem;align-items:flex-start;";
-          item.innerHTML = `
-            <textarea class="field-textarea" style="min-height:64px;">${doel}</textarea>
-            <button class="btn-row-del" type="button" onclick="delDoel(this)">✕</button>
-          `;
-          doelenList.appendChild(item);
+          // situatieschets + analyse
+          const textareas = entry.querySelectorAll(".ihp-body > .ihp-section > .field-textarea");
+          if (textareas[0]) textareas[0].value = plan.situatieschets || "";
+          if (textareas[1]) textareas[1].value = plan.analyse || "";
+
+          // subdoelen-container ophalen
+          const list = document.getElementById(`subdoelen-${id}`);
+          if (!list || !Array.isArray(plan.subdoelen)) return;
+
+          // bestaande (auto toegevoegde) subdoelen leegmaken
+          list.innerHTML = "";
+
+          plan.subdoelen.forEach((sub) => {
+            // nieuw subdoel in DOM aanmaken
+            addSubdoel(id);
+            const subItems = list.querySelectorAll(".subdoel-item");
+            const subEl = subItems[subItems.length - 1];
+            if (!subEl) return;
+
+            const subId = subEl.id.replace("subdoel-", "");
+
+            // titel + tekst
+            const titelInput = subEl.querySelector("input.field-input");
+            const tekstArea = subEl.querySelector("textarea.field-textarea");
+            if (titelInput) titelInput.value = sub.titel || "";
+            if (tekstArea) tekstArea.value = sub.tekst || "";
+
+            // aanpak-rijen
+            const aanpakBody = document.getElementById(`aanpak-${subId}`);
+            if (aanpakBody) aanpakBody.innerHTML = "";
+            if (Array.isArray(sub.aanpak)) {
+              sub.aanpak.forEach((rij) => {
+                const rowId = `${subId}-r${aanpakRowCounter++}`;
+                const tr = document.createElement("tr");
+                tr.id = `aanpak-row-${rowId}`;
+                tr.innerHTML = `
+                  <td><textarea class="field-textarea" style="min-height:56px;">${rij.wat || ""}</textarea></td>
+                  <td><input class="field-input" type="text" value="${rij.wie || ""}" /></td>
+                  <td><input class="field-input" type="text" value="${rij.wanneer || ""}" /></td>
+                  <td><input class="field-input" type="text" value="${rij.evaluatie || ""}" /></td>
+                  <td><button class="btn-row-del" type="button" onclick="delAanpakRow('${rowId}')">✕</button></td>
+                `;
+                aanpakBody.appendChild(tr);
+              });
+            }
+
+            // evaluaties per subdoel
+            const evalList = document.getElementById(`evaluaties-${subId}`);
+            if (evalList) evalList.innerHTML = "";
+            if (Array.isArray(sub.evaluaties)) {
+              sub.evaluaties.forEach((ev) => {
+                const item = document.createElement("div");
+                item.className = "eval-item";
+                item.innerHTML = `
+                  <div class="eval-grid">
+                    <div class="eval-label">Datum</div>
+                    <div><input class="field-input" type="text" value="${ev.datum || ""}" /></div>
+                    <div class="eval-label">Type</div>
+                    <div><input class="field-input" type="text" value="${ev.type || ""}" /></div>
+                  </div>
+                  <div style="margin-top:0.5rem;display:grid;grid-template-columns:120px 1fr auto;gap:0.75rem;">
+                    <div class="eval-label">Bevinding</div>
+                    <textarea class="field-textarea" style="min-height:64px;">${ev.bevinding || ""}</textarea>
+                    <button class="btn-row-del" type="button" onclick="this.closest('.eval-item').remove()">✕</button>
+                  </div>
+                `;
+                evalList.appendChild(item);
+              });
+            }
+          });
         });
-      }
-
-      const aanpakBody = document.getElementById(`aanpak-body-${id}`);
-      if (aanpakBody && plan.aanpak && plan.aanpak.length > 0) {
-        aanpakBody.innerHTML = "";
-        plan.aanpak.forEach((rij) => {
-          const rowId = `${id}-r${aanpakRowCounter++}`;
-          const tr = document.createElement("tr");
-          tr.id = `aanpak-row-${rowId}`;
-          tr.innerHTML = `
-            <td><textarea class="field-textarea" style="min-height:56px;">${rij.wat || ""}</textarea></td>
-            <td><input class="field-input" type="text" value="${rij.wie || ""}" /></td>
-            <td><input class="field-input" type="text" value="${rij.wanneer || ""}" /></td>
-            <td><input class="field-input" type="text" value="${rij.evaluatie || ""}" /></td>
-            <td><button class="btn-row-del" type="button" onclick="delAanpakRow('${rowId}')">✕</button></td>
-          `;
-          aanpakBody.appendChild(tr);
-        });
-      }
-
-      const evalList = document.getElementById(`evaluaties-${id}`);
-      if (evalList && plan.evaluaties && plan.evaluaties.length > 0) {
-        evalList.innerHTML = "";
-        plan.evaluaties.forEach((ev) => {
-          const item = document.createElement("div");
-          item.className = "eval-item";
-          item.innerHTML = `
-            <div class="eval-grid">
-              <div class="eval-label">Datum</div>
-              <div><input class="field-input" type="text" value="${ev.datum || ""}" /></div>
-              <div class="eval-label">Type</div>
-              <div><input class="field-input" type="text" value="${ev.type || ""}" /></div>
-            </div>
-            <div style="margin-top:0.5rem;display:grid;grid-template-columns:120px 1fr auto;gap:0.75rem;">
-              <div class="eval-label">Bevinding</div>
-              <textarea class="field-textarea" style="min-height:64px;">${ev.bevinding || ""}</textarea>
-              <button class="btn-row-del" type="button" onclick="this.closest('.eval-item').remove()">✕</button>
-            </div>
-          `;
-          evalList.appendChild(item);
-        });
+      } catch (e) {
+        console.error("Parse fout voor domein", sec, e);
       }
     });
-  } catch (e) {
-    console.error("Parse fout voor domein", sec, e);
-  }
-});
     window.scrollTo(0, scrollPos);
   } catch (err) {
     console.error("Laden mislukt:", err);
