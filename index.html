@@ -1946,6 +1946,7 @@ msalReady.then(() => {
 
     // autosave elke 30s als er wijzigingen zijn
     setInterval(() => {
+      console.log("autosave check", { hasUnsavedChanges, isSaving, currentStudent });
       if (hasUnsavedChanges && !isSaving && currentStudent) {
         saveToBackend(true); // true = autosave
       }
