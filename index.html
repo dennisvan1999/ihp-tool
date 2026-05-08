@@ -1426,21 +1426,19 @@ function addEvaluatieSubdoel(subId) {
   };
 
   const ihpBody = {
-    leerlingId: key,
-    metadata: {
-      naam: name,
-      klas: klas,
-      lb: lb,
-      kd: "",
-      periode: "",
-    },
-    ooz: { onderwijs: "", opvoeding: "", zorg: "" },
-    actief_domein: "leren",
-    ihp_leren: [],
-    ihp_psych: [],
-    ihp_olb: [],
-    ihp_prev: [],
-  };
+  leerlingId: key,
+  metadata: {
+    lb: lb,
+    kd: "",
+    periode: "",
+  },
+  ooz: { onderwijs: "", opvoeding: "", zorg: "" },
+  actief_domein: "leren",
+  ihp_leren: [],
+  ihp_psych: [],
+  ihp_olb: [],
+  ihp_prev: [],
+};
 
   const idUrl = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/e1a21cefc1074f54940eccec27f2c5b9/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2LM8J8Fp-5J78ScxvFpj0wy1ljthLNVO8ziJsm4b8Jg";
 
