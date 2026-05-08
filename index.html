@@ -1420,9 +1420,13 @@ function addEvaluatieSubdoel(subId) {
   const klas = document.getElementById("m-klas").value.trim();
   const lb = document.getElementById("m-lb").value.trim();
   const key = "s" + Date.now();
-
+ 
+      // naam en klas encrypteren voor opslag
+  const naamEnc = await encryptText(name);
+  const klasEnc = await encryptText(klas);
+ 
   const idBody = {
-    leerlingId: key,
+  leerlingId: key,
   };
 
   const ihpBody = {
