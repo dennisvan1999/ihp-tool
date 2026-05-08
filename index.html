@@ -1424,6 +1424,9 @@ function addEvaluatieSubdoel(subId) {
       // naam en klas encrypteren voor opslag
   const naamEnc = await encryptText(name);
   const klasEnc = await encryptText(klas);
+  console.log("encrypted naam:", naamEnc);
+console.log("encrypted klas:", klasEnc);
+console.log("ihpBody:", JSON.stringify(ihpBody));
  
   const idBody = {
   leerlingId: key,
