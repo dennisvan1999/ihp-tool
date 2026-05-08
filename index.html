@@ -1105,9 +1105,9 @@
    <div class="ihp-entry-label">
   <span class="num">${num}</span>
   <input class="field-input" type="text" 
-    placeholder="Omschrijf het doel..."
-    style="font-weight:700;font-size:var(--text-sm);border:none;background:transparent;padding:0;width:300px;"
-    onclick="event.stopPropagation()" />
+  placeholder="Omschrijf het doel..."
+  style="font-weight:700;font-size:var(--text-sm);border:none;background:transparent;padding:0;width:300px;"
+  onclick="event.stopPropagation()" oninput="markDirty()" />
 </div>
     <div class="ihp-entry-meta">
       <span class="entry-date-badge">Aangemaakt ${date}</span>
@@ -1241,7 +1241,8 @@
     </div>
 
     <textarea class="field-textarea" style="min-height:64px;margin-bottom:var(--space-3);"
-      placeholder="Na deze periode kan / doet de leerling … (concreet, meetbaar, haalbaar, tijdgebonden)."></textarea>
+  placeholder="Na deze periode kan / doet de leerling … (concreet, meetbaar, haalbaar, tijdgebonden)."
+  oninput="markDirty()"></textarea>
 
     <div class="ihp-section-title" style="margin-bottom:var(--space-2);">Aanpak</div>
     <table class="aanpak-table" style="margin-bottom:var(--space-2);">
@@ -1296,13 +1297,13 @@ function addEvaluatieSubdoel(subId) {
   item.innerHTML = `
     <div class="eval-grid">
       <div class="eval-label">Datum</div>
-      <div><input class="field-input" type="text" placeholder="bv. 12/05/2026" /></div>
+      <div><input class="field-input" type="text" placeholder="bv. 12/05/2026" oninput="markDirty()" /></div>
       <div class="eval-label">Type</div>
-      <div><input class="field-input" type="text" placeholder="tussenevaluatie / eindevaluatie" /></div>
+      <div><input class="field-input" type="text" placeholder="tussenevaluatie / eindevaluatie" oninput="markDirty()" /></div>
     </div>
     <div style="margin-top:0.5rem;display:grid;grid-template-columns:120px 1fr auto;gap:0.75rem;">
       <div class="eval-label">Bevinding</div>
-      <textarea class="field-textarea" style="min-height:64px;" placeholder="Beschrijf de bevindingen"></textarea>
+      <textarea class="field-textarea" style="min-height:64px;" placeholder="Beschrijf de bevindingen" oninput="markDirty()" ></textarea>
       <button class="btn-row-del" type="button" onclick="this.closest('.eval-item').remove()">✕</button>
     </div>
   `;
