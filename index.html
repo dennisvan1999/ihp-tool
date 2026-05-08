@@ -1938,20 +1938,18 @@ msalReady.then(() => {
     document.querySelector("main").classList.remove("inhoud-verborgen");
     laadAlleLeerlingen();
 
+    // velden "dirty" maken bij wijziging
+    document.querySelectorAll("input, textarea, select").forEach((el) => {
+      el.addEventListener("input", markDirty);
+      el.addEventListener("change", markDirty);
+    });
+
     // autosave elke 30s als er wijzigingen zijn
     setInterval(() => {
       if (hasUnsavedChanges && !isSaving && currentStudent) {
         saveToBackend(true); // true = autosave
       }
     }, 30000);
-  }
-});
-
-    // velden "dirty" maken bij wijziging
-    document.querySelectorAll("input, textarea, select").forEach((el) => {
-      el.addEventListener("input", markDirty);
-      el.addEventListener("change", markDirty);
-    });
   }
 });
   </script>
