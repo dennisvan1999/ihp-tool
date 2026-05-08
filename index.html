@@ -1424,9 +1424,6 @@ function addEvaluatieSubdoel(subId) {
       // naam en klas encrypteren voor opslag
   const naamEnc = await encryptText(name);
   const klasEnc = await encryptText(klas);
-  console.log("encrypted naam:", naamEnc);
-console.log("encrypted klas:", klasEnc);
-console.log("ihpBody:", JSON.stringify(ihpBody));
  
   const idBody = {
   leerlingId: key,
@@ -1449,6 +1446,9 @@ console.log("ihpBody:", JSON.stringify(ihpBody));
   ihp_prev: [],
 };
 
+console.log("encrypted naam:", naamEnc);
+console.log("encrypted klas:", klasEnc);
+console.log("ihpBody:", JSON.stringify(ihpBody));
   const idUrl = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/e1a21cefc1074f54940eccec27f2c5b9/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2LM8J8Fp-5J78ScxvFpj0wy1ljthLNVO8ziJsm4b8Jg";
 
   const ihpUrl = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/252d3c81492b43fca07c5ecfa971f0f7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wqbAR6S1j-Xp7T-yUqL6Mz1RZPnJcqcjyy8WHb8lZpc";
