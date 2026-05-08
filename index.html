@@ -1460,10 +1460,10 @@ function addEvaluatieSubdoel(subId) {
       }),
     ]);
 
-    if (!idRes.ok || !ihpRes.ok) {
-      alert("Leerling toevoegen mislukt.");
-      return;
-    }
+    if (!ihpRes.ok) {
+  alert("Leerling toevoegen mislukt.");
+  return;
+}
 
     students[key] = {
       name, klas, lb,
