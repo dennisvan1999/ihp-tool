@@ -1059,6 +1059,7 @@
     let isSaving = false;
     let hasUnsavedChanges = false;
     let lastAutosave = null;
+    let alleLeerlingenData = [];
 
     const students = {
       s1: {
@@ -1789,8 +1790,7 @@ if (Array.isArray(sub.evaluaties)) {
   } catch (err) {
     console.error("Laden mislukt:", err);
   }
-
-    let alleLeerlingenData = [];
+}  
 
 function filterLeerlingen(query) {
   const dropdown = document.getElementById("studentDropdown");
