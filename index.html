@@ -1528,7 +1528,11 @@ async function getToken() {
     // alle handelingsplannen in dit domein
     document.querySelectorAll(`#entries-${sec} .ihp-entry`).forEach((entry) => {
       const id = entry.id.replace("ihp-", "");
-
+      
+    // Hoofddoel
+      const headerTitleInput = entry.querySelector(".ihp-entry-label input.field-input");
+      const titel = headerTitleInput?.value || "";
+      
       // situatieschets + analyse
       const textareas = entry.querySelectorAll(".ihp-body > .ihp-section > .field-textarea");
       const situatieschets = textareas[0]?.value || "";
@@ -1574,7 +1578,7 @@ async function getToken() {
           subdoelen.push({ subId, titel, tekst, aanpak, evaluaties });
         });
 
-      plannen.push({ id, domein: sec, situatieschets, analyse, subdoelen });
+      plannen.push({ id, domein: sec, titel, situatieschets, analyse, subdoelen });
     });
 
     ihpPerDomein[sec] = plannen;
@@ -1665,7 +1669,10 @@ async function loadFromBackend(leerlingId) {
           const entry = entries[entries.length - 1];
           if (!entry) return;
 
+          //hoofddoel in header
           const id = entry.id.replace("ihp-", "");
+          const headerTitleInput = entry.querySelector(".ihp-entry-label input.field-input");
+          if (headerTitleInput) headerTitleInput.value = plan.titel || "";
 
           // situatieschets + analyse
           const textareas = entry.querySelectorAll(".ihp-body > .ihp-section > .field-textarea");
