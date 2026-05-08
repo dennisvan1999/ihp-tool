@@ -1772,7 +1772,7 @@ if (Array.isArray(sub.evaluaties)) {
   '<div style="margin-top:0.5rem;display:grid;grid-template-columns:120px 1fr auto;gap:0.75rem;">' +
   '  <div class="eval-label">Bevinding</div>' +
   '  <textarea class="field-textarea" style="min-height:64px;">' + (ev.bevinding || "") + '</textarea>' +
-  '  <button class="btn-row-del" type="button" onclick="this.closest(\\'.eval-item\\').remove()">✕</button>' +
+  '  <button class="btn-row-del" type="button" onclick="this.parentNode.parentNode.remove()">✕</button>' +
   '</div>';
 
     item.innerHTML = html;
