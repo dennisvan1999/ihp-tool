@@ -1755,28 +1755,30 @@ async function loadFromBackend(leerlingId) {
             }
 
             // evaluaties per subdoel
-            const evalList = document.getElementById(`evaluaties-${subId}`);
-            if (evalList) evalList.innerHTML = "";
-            if (Array.isArray(sub.evaluaties)) {
-              sub.evaluaties.forEach((ev) => {
-                const item = document.createElement("div");
-                item.className = "eval-item";
-                item.innerHTML = `
-                  <div class="eval-grid">
-                    <div class="eval-label">Datum</div>
-                    <div><input class="field-input" type="text" value="${ev.datum || ""}" /></div>
-                    <div class="eval-label">Type</div>
-                    <div><input class="field-input" type="text" value="${ev.type || ""}" /></div>
-                  </div>
-                  <div style="margin-top:0.5rem;display:grid;grid-template-columns:120px 1fr auto;gap:0.75rem;">
-                    <div class="eval-label">Bevinding</div>
-                    <textarea class="field-textarea" style="min-height:64px;">${ev.bevinding || ""}</textarea>
-                    <button class="btn-row-del" type="button" onclick="this.closest('.eval-item').remove()">✕</button>
-                  </div>
-                `;
-                evalList.appendChild(item);
-              });
-            }
+const evalList = document.getElementById(`evaluaties-${subId}`);
+if (evalList) evalList.innerHTML = "";
+if (Array.isArray(sub.evaluaties)) {
+  sub.evaluaties.forEach((ev) => {
+    const item = document.createElement("div");
+    item.className = "eval-item";
+
+    const html =
+  '<div class="eval-grid">' +
+  '  <div class="eval-label">Datum</div>' +
+  '  <div><input class="field-input" type="text" value="' + (ev.datum || "") + '" /></div>' +
+  '  <div class="eval-label">Type</div>' +
+  '  <div><input class="field-input" type="text" value="' + (ev.type || "") + '" /></div>' +
+  '</div>' +
+  '<div style="margin-top:0.5rem;display:grid;grid-template-columns:120px 1fr auto;gap:0.75rem;">' +
+  '  <div class="eval-label">Bevinding</div>' +
+  '  <textarea class="field-textarea" style="min-height:64px;">' + (ev.bevinding || "") + '</textarea>' +
+  '  <button class="btn-row-del" type="button" onclick="this.closest(\\'.eval-item\\').remove()">✕</button>' +
+  '</div>';
+
+    item.innerHTML = html;
+    evalList.appendChild(item);
+  });
+}
           });
         });
       } catch (e) {
