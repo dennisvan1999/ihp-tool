@@ -1740,8 +1740,8 @@ async function loadFromBackend(leerlingId) {
     if (!data) return;
     console.log("Data van SharePoint:", data);
 
-    document.getElementById("f-naam").value = data.Title || "";
-    document.getElementById("f-klas").value = data.Klas || "";
+    document.getElementById("f-naam").value = await decryptText(data.Title || "");
+    document.getElementById("f-klas").value = await decryptText(data.Klas || "");
     document.getElementById("f-lb").value = data.LB || "";
     document.getElementById("f-kd").value = data.KD || "";
     document.getElementById("f-periode").value = data.Periode || "";
