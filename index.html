@@ -762,7 +762,7 @@
       }
     }
 
-    @media print {
+   @media print {
   .topbar,
   .topbar-right,
   .selector-bar,
@@ -789,8 +789,27 @@
   .domain-panel {
     display: block !important;
     margin-bottom: 2rem;
-    page-break-inside: avoid;
     break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .domain-header {
+    break-after: avoid;
+    page-break-after: avoid;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 0.75rem;
+  }
+
+  .domain-header + .ihp-entries,
+  .domain-header + .ihp-entries .ihp-entry:first-child {
+    break-before: avoid;
+    page-break-before: avoid;
+  }
+
+  .ihp-entries {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .student-card,
@@ -800,6 +819,10 @@
     break-inside: avoid;
     box-shadow: none !important;
     border: 1px solid #ccc !important;
+  }
+
+  .ihp-entry {
+    margin-top: 0 !important;
   }
 }
     .search-wrapper {
