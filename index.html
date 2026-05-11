@@ -1742,13 +1742,13 @@ async function loadFromBackend(leerlingId) {
     if (!data) return;
     console.log("Data van SharePoint:", data);
 
-   const huidigNaam = students[leerlingId]?.name || "";
-   const huidigKlas = students[leerlingId]?.klas || "";
+   const decNaam = await decryptText(data.Title || "");
+   const decKlas = await decryptText(data.Klas || "");
     console.log("data.Title raw:", data.Title);
     console.log("gedecrypteerd naam:", decNaam);
     console.log("gedecrypteerd klas:", decKlas);
-    document.getElementById("f-naam").value = huidigNaam;
-document.getElementById("f-klas").value = huidigKlas;
+    document.getElementById("f-naam").value = decNaam;
+    document.getElementById("f-klas").value = decKlas;
     document.getElementById("f-lb").value = data.LB || "";
     document.getElementById("f-kd").value = data.KD || "";
     document.getElementById("f-periode").value = data.Periode || "";
