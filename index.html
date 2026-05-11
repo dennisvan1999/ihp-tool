@@ -1973,6 +1973,10 @@ document.addEventListener("click", (e) => {
     for (const l of leerlingen) {
       // zoek het bijbehorende item in IHP_ID op basis van LeerlingId
       const idItem = idData.find(i => (i.LeerlingID === l.LeerlingId) || (i.LeerlingId === l.LeerlingId));
+      const idItem = idData.find(i => (i.LeerlingID === l.LeerlingId) || (i.LeerlingId === l.LeerlingId));
+      console.log("idData:", idData);
+      console.log("l.LeerlingId:", l.LeerlingId);
+      console.log("idItem:", idItem);
       const naamEnc = idItem?.Title || l.Title || "";
       const klasEnc = idItem?.Klas || l.Klas || "";
 
