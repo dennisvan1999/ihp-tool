@@ -1973,6 +1973,8 @@ document.addEventListener("click", (e) => {
     for (const l of leerlingen) {
       // zoek het bijbehorende item in IHP_ID op basis van LeerlingId
       const idItem = idData.find(i => i.LeerlingIDd === l.LeerlingId);
+      console.log("idItem na fix:", idItem);
+      console.log("naam uit idItem:", idItem?.Title);
       console.log("idData:", idData);
       console.log("l.LeerlingId:", l.LeerlingId);
       console.log("idItem:", idItem);
