@@ -763,23 +763,45 @@
     }
 
     @media print {
-      .topbar,
-      .topbar-right,
-      .selector-bar,
-      .tabs,
-      .btn,
-      .btn-add-entry,
-      .btn-row-add,
-      .btn-row-del,
-      .btn-delete,
-      .modal-backdrop {
-        display: none !important;
-      }
-      body {
-        background: #fff;
-        color: #000;
-      }
-    }
+  .topbar,
+  .topbar-right,
+  .selector-bar,
+  .tabs,
+  .btn,
+  .btn-add-entry,
+  .btn-row-add,
+  .btn-row-del,
+  .btn-delete,
+  .modal-backdrop {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  main {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .domain-panel {
+    display: block !important;
+    margin-bottom: 2rem;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .student-card,
+  .ooz-card,
+  .ihp-entry {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+}
     .search-wrapper {
   position: relative;
   display: flex;
@@ -867,6 +889,7 @@
       <button class="btn btn-ghost btn-sm" onclick="openModal()">Leerling toevoegen</button>
       <button class="btn btn-ghost btn-sm" onclick="verwijderLeerling()" style="color:var(--color-error);border-color:var(--color-error);">Leerling verwijderen</button>
       <button class="btn btn-ghost btn-sm" onclick="exportJSON()">Exporteer JSON</button>
+      <button class="btn btn-ghost btn-sm" onclick="printVolledigDossier()">Download volledig dossier (PDF)</button>
       <button class="btn btn-primary btn-sm" onclick="saveToBackend()">Opslaan naar M365</button>
     </div>
 
@@ -2001,6 +2024,39 @@ document.addEventListener("click", (e) => {
   } catch (err) {
     console.error("Laden leerlingen mislukt:", err);
   }
+}
+function printVolledigDossier() {
+  const activeTab = document.querySelector(".tab.active")?.dataset.section || "leren";
+  const panels = document.querySelectorAll(".domain-panel");
+  const tabs = document.querySelector(".tabs");
+
+  // tabs verbergen tijdens print
+  if (tabs) tabs.style.display = "none";
+
+  // alle panelen tijdelijk zichtbaar maken
+  panels.forEach((panel) => {
+    panel.dataset.wasActive = panel.classList.contains("active") ? "true" : "false";
+    panel.classList.add("active");
+    panel.style.display = "block";
+  });
+
+  setTimeout(() => {
+    window.print();
+
+    // na print normale weergave herstellen
+    setTimeout(() => {
+      if (tabs) tabs.style.display = "";
+
+      panels.forEach((panel) => {
+        panel.style.display = "";
+        if (panel.id === `panel-${activeTab}`) {
+          panel.classList.add("active");
+        } else {
+          panel.classList.remove("active");
+        }
+      });
+    }, 300);
+  }, 100);
 }
 async function loginEnLaad() {
   try {
