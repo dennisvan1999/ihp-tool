@@ -1965,10 +1965,12 @@ document.addEventListener("click", (e) => {
 
     alleLeerlingenData = leerlingen;
 
-    leerlingen.forEach((l) => {
+    for (const l of leerlingen) {
+      const naam = await decryptText(l.Title);
+      const klas = await decryptText(l.Klas);
       students[l.LeerlingId] = {
-        name: l.Title,
-        klas: l.Klas || "",
+        name: naam,
+        klas: klas,
         lb: l.LB || "",
         kd: l.KD || "",
         periode: l.Periode || "",
@@ -1979,13 +1981,15 @@ document.addEventListener("click", (e) => {
         },
         entries: { leren: [], psych: [], olb: [], prev: [] },
       };
-    });
+    }
 
     // eerste leerling automatisch laden
     if (leerlingen.length > 0) {
       currentStudent = leerlingen[0].LeerlingId;
+      const naam = await decryptText(leerlingen[0].Title);
+      const klas = await decryptText(leerlingen[0].Klas);
       const search = document.getElementById("studentSearch");
-      if (search) search.value = `${leerlingen[0].Title} ${leerlingen[0].Klas || ""}`;
+      if (search) search.value = `${naam} ${klas}`;
       loadFromBackend(currentStudent);
     }
   } catch (err) {
