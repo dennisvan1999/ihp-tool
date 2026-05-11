@@ -1868,8 +1868,8 @@ function filterLeerlingen(query) {
 
   const gefilterd = q
     ? alleLeerlingenData.filter((l) =>
-        (l.Title || "").toLowerCase().includes(q) ||
-        (l.Klas || "").toLowerCase().includes(q)
+        (l.NaamPlain || "").toLowerCase().includes(q) ||
+        (l.KlasPlain || "").toLowerCase().includes(q)
       )
     : alleLeerlingenData;
 
@@ -1879,11 +1879,11 @@ function filterLeerlingen(query) {
   }
 
   dropdown.innerHTML = gefilterd.map((l) => `
-    <div onclick="selecteerLeerling('${l.LeerlingId}', '${l.Title} ${l.Klas || ''}')"
+    <div onclick="selecteerLeerling('${l.LeerlingId}', '${l.NaamPlain} ${l.KlasPlain || ''}')"
       style="padding:var(--space-2) var(--space-3);cursor:pointer;font-size:var(--text-sm);"
       onmouseover="this.style.background='var(--color-surface-offset)'"
       onmouseout="this.style.background=''">
-      ${l.Title} <span style="color:var(--color-text-muted)">${l.Klas || ""}</span>
+      ${l.NaamPlain} <span style="color:var(--color-text-muted)">${l.KlasPlain || ""}</span>
     </div>
   `).join("");
 
@@ -1933,10 +1933,10 @@ document.addEventListener("click", (e) => {
     if (search) search.value = "";
 
     // eerste leerling laden
-    if (alleLeerlingenData.length > 0) {
-      currentStudent = alleLeerlingenData[0].LeerlingId;
-      if (search) search.value = `${alleLeerlingenData[0].Title} ${alleLeerlingenData[0].Klas || ""}`;
-      loadFromBackend(currentStudent);
+  if (alleLeerlingenData.length > 0) {
+  currentStudent = alleLeerlingenData[0].LeerlingId;
+  if (search) search.value = `${alleLeerlingenData[0].NaamPlain} ${alleLeerlingenData[0].KlasPlain || ""}`;
+  loadFromBackend(currentStudent);
       SECTIONS.forEach(s => {
         document.getElementById(`entries-${s}`).innerHTML = "";
         updateCount(s);
@@ -1971,9 +1971,11 @@ document.addEventListener("click", (e) => {
     alleLeerlingenData = leerlingen;
 
     for (const l of leerlingen) {
-      const naam = await decryptText(l.Title);
-      const klas = await decryptText(l.Klas);
-      students[l.LeerlingId] = {
+    const naam = await decryptText(l.Title);
+    const klas = await decryptText(l.Klas);
+    l.NaamPlain = naam;
+    l.KlasPlain = klas;
+    students[l.LeerlingId] = {
         name: naam,
         klas: klas,
         lb: l.LB || "",
