@@ -1958,26 +1958,35 @@ document.addEventListener("click", (e) => {
   }
 }
     async function laadAlleLeerlingen() {
-  const url = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f3efa19d88d14b0d9d025cd3b482c70e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gGokIvwYQXwWiLUV_aKWDP1nHIRWIdJzS07dB9VNHa4";
+  const leerlingenUrl = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f3efa19d88d14b0d9d025cd3b482c70e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=gGokIvwYQXwWiLUV_aKWDP1nHIRWIdJzS07dB9VNHa4";
+  const idUrl = "https://default1363a26ca9154848be6ff3110f81eb.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/ace4af82fc354ff28e2ea28366351ae9/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=1iNWiVOFVIwufXhoUi4I7m4Q_iOHWR0_Bvgo13YEp7A";
+
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
-    });
-    if (!res.ok) return;
-    const text = await res.text();
-    const leerlingen = JSON.parse(text);
+    const [leerlingenRes, idRes] = await Promise.all([
+      fetch(leerlingenUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) }),
+      fetch(idUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) }),
+    ]);
+
+    if (!leerlingenRes.ok) return;
+    const leerlingen = JSON.parse(await leerlingenRes.text());
     if (!leerlingen || !leerlingen.length) return;
+
+    const idData = idRes.ok ? JSON.parse(await idRes.text()) : [];
 
     alleLeerlingenData = leerlingen;
 
     for (const l of leerlingen) {
-    const naam = await decryptText(l.Title);
-    const klas = await decryptText(l.Klas);
-    l.NaamPlain = naam;
-    l.KlasPlain = klas;
-    students[l.LeerlingId] = {
+      // zoek het bijbehorende item in IHP_ID op basis van LeerlingId
+      const idItem = idData.find(i => i.LeerlingID === l.LeerlingId);
+      const naamEnc = idItem?.Title || l.Title || "";
+      const klasEnc = idItem?.Klas || l.Klas || "";
+
+      const naam = await decryptText(naamEnc);
+      const klas = await decryptText(klasEnc);
+      l.NaamPlain = naam;
+      l.KlasPlain = klas;
+
+      students[l.LeerlingId] = {
         name: naam,
         klas: klas,
         lb: l.LB || "",
@@ -1992,20 +2001,16 @@ document.addEventListener("click", (e) => {
       };
     }
 
-    // eerste leerling automatisch laden
     if (leerlingen.length > 0) {
       currentStudent = leerlingen[0].LeerlingId;
-      const naam = await decryptText(leerlingen[0].Title);
-      const klas = await decryptText(leerlingen[0].Klas);
       const search = document.getElementById("studentSearch");
-      if (search) search.value = `${naam} ${klas}`;
+      if (search) search.value = `${leerlingen[0].NaamPlain} ${leerlingen[0].KlasPlain || ""}`;
       loadFromBackend(currentStudent);
     }
   } catch (err) {
     console.error("Laden leerlingen mislukt:", err);
   }
 }
-
 async function loginEnLaad() {
   try {
     await msalInstance.loginPopup({ scopes: ["User.Read"] });
