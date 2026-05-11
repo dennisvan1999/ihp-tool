@@ -1481,34 +1481,25 @@ console.log("ihpBody:", JSON.stringify(ihpBody));
       entries: { leren: [], olb: [], psych: [], prev: [] },
     };
 
-    alleLeerlingenData.push({
-      LeerlingId: key,
-      Title: name,
-      Klas: klas,
-      LB: lb,
-    });
-
-    const search = document.getElementById("studentSearch");
-    if (search) search.value = `${name} ${klas}`;
-
-    currentStudent = key;
-    SECTIONS.forEach((s) => {
-      document.getElementById(`entries-${s}`).innerHTML = "";
-      updateCount(s);
-    });
-
-    document.getElementById("f-naam").value = name;
-    document.getElementById("f-klas").value = klas;
-    document.getElementById("f-lb").value = lb;
-    document.getElementById("f-kd").value = "";
-    document.getElementById("f-periode").value = "";
-    document.getElementById("ooz-onderwijs").value = "";
-    document.getElementById("ooz-opvoeding").value = "";
-    document.getElementById("ooz-zorg").value = "";
-
     closeModal();
-    ["m-naam", "m-klas", "m-lb"].forEach((id) => (document.getElementById(id).value = ""));
-    alert(`Leerling ${name} succesvol toegevoegd!`);
+["m-naam", "m-klas", "m-lb"].forEach((id) => {
+  document.getElementById(id).value = "";
+});
+
+await laadAlleLeerlingen();
+
+const search = document.getElementById("studentSearch");
+if (search) search.value = `${name} ${klas}`;
+
+currentStudent = key;
+SECTIONS.forEach((s) => {
+  document.getElementById(`entries-${s}`).innerHTML = "";
+  updateCount(s);
+});
+
+await loadFromBackend(key);
+
+alert(`Leerling ${name} succesvol toegevoegd!`);
 
   } catch (err) {
     console.error(err);
